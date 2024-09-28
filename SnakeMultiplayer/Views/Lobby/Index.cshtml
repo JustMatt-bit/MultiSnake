@@ -1,0 +1,67 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Lobby";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string playerName = (string)ViewData["playerName"];
+    string lobbyName = (string)ViewData["lobbyId"];
+    bool isHost = ViewData["IsHost"] == null ? false : (bool)ViewData["IsHost"];
+}
+
+<div class="d-flex justify-content-center">
+    <div class="d-flex justify-content-center">
+        <h1> @ViewData["lobbyId"] lobby</h1>
+    </div>
+</div>
+
+<br />
+<div id="playerCards" class="d-flex justify-content-center">
+</div>
+<br />
+@if (isHost)
+{
+    <div class="d-flex justify-content-center">
+        <div class="btn-group">
+            <button id="SpeedBtn" type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Speed
+            </button>
+            <div class="dropdown-menu">
+                <a id="SlowSpeedBtn" class="dropdown-item">Slow</a>
+                <a id="NormalSpeedBtn" class="dropdown-item">Normal</a>
+                <a id="FastSpeedBtn" class="dropdown-item">Fast</a>
+                <div class="dropdown-divider"></div>
+                <a id="NoSpeedBtn" class="dropdown-item">No speed</a>
+            </div>
+        </div>
+        <button id="startButton" type="button" class="btn btn-success">Start game</button>
+    </div>
+
+}
+<br />
+<div id="CanvasDiv" align="center">
+    <canvas id="Canvas" style="visibility: hidden;">  </canvas>
+    <div id="arrowButtons" class="container h-100 d-flex justify-content-center align-items-center" style="display: none !important;">
+        <div class="row text-center">
+            <div class="col-12">
+                <button id="ArrowUpBtn" class="btn btn-success btn-lg">&#8593;</button>
+            </div>
+            <div class="col-12 d-flex justify-content-center my-2">
+                <button id="ArrowLeftBtn" class="btn btn-success btn-lg mx-4">&#8592;</button>
+                <button id="ArrowRightBtn" class="btn btn-success btn-lg mx-4">&#8594;</button>
+            </div>
+            <div class="col-12">
+                <button id="ArrowDownBtn" class="btn btn-success btn-lg">&#8595;</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/CustomLinkedList.js"></script>
+<script src="~/js/SignalRController.js"></script>
+<script src="~/js/Cell.js"></script>
+<script src="~/js/CanvasRendering.js"></script>
+<script src="~/js/CellContainer.js"></script>
+<script src="~/js/GameController.js"></script>
+<script src="~/js/Dispatcher.js"></script>
+<script src="~/js/Main.js"></script>
