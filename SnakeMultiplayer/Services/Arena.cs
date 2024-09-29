@@ -26,7 +26,7 @@ public class Arena
     Coordinate Food;
     Obstacle[] Obstacles;
 
-    public Arena(ConcurrentDictionary<string, Snake> players, int obstacleCount=2)
+    public Arena(ConcurrentDictionary<string, Snake> players, int obstacleCount)
     {
         Snakes = players;
         PendingActions = new ConcurrentDictionary<string, MoveDirection>();
@@ -81,30 +81,20 @@ public class Arena
         }
 
         Food = null;
-        _ = new Coordinate(Random.Next(0, Width), Random.Next(0, Height));
-        var isFoodSet = false;
-        bool contains;
-
-        while (!isFoodSet)
+        while (true)
         {
             var newFood = new Coordinate(Random.Next(0, Width), Random.Next(0, Height));
-            //var containsSnake = Snakes.Values.Any(snake => snake.Contains(newFood));
-            //var isObstacleCell = Board[newFood.X, newFood.Y] == Cells.obstacle;
 
-            contains = false;
-            foreach (var snake in Snakes.Values)
-            {
-                if (snake.Contains(newFood))
-                {
-                    contains = true;
-                    break;
-                }
-            }
-            if (!contains)
+            // Check if the newFood position is occupied by a snake or an obstacle
+            bool containsSnake = Snakes.Values.Any(snake => snake.Contains(newFood));
+            bool isObstacleCell = Obstacles.Any(obstacle => obstacle.Position.X == newFood.X && obstacle.Position.Y == newFood.Y);
+
+            // If it's not occupied by a snake or an obstacle, set the food
+            if (!containsSnake && !isObstacleCell)
             {
                 Food = newFood;
                 Board[newFood.X, newFood.Y] = Cells.food;
-                return;
+                return; // Set the flag to exit the loop
             }
         }
         //TODO: Player won? Refactor to better logic.
