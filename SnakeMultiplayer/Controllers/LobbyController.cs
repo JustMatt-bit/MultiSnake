@@ -18,11 +18,12 @@ public class LobbyController : Controller
     public IActionResult CreateLobby() => View();
 
     [HttpPost]
-    public IActionResult CreateLobby([FromServices] IGameServerService gameServer, string id = "")
+    public IActionResult CreateLobby([FromServices] IGameServerService gameServer, string id = "", int obstacleCount = 0)
     {
         string playerName = User.Identity.Name;
         ViewData["playerName"] = playerName;
         ViewData["lobbyId"] = id;
+        ViewData["obstacleCount"] = obstacleCount;
 
         var errorMessage = IsValid(id, playerName);
         if (!errorMessage.Equals(string.Empty))
@@ -31,7 +32,7 @@ public class LobbyController : Controller
             return View();
         }
 
-        if (!gameServer.TryCreateLobby(id, playerName, gameServer))
+        if (!gameServer.TryCreateLobby(id, obstacleCount, playerName, gameServer))
         {
             ViewData["ErrorMessage"] = $"Lobby with {id} already exists. Please enter different name";
             return View();
