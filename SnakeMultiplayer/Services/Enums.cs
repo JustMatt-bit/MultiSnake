@@ -29,7 +29,8 @@ public enum Cells
 {
     empty = 0,
     food = 1,
-    snake = 2
+    snake = 2,
+    obstacle = 3
 }
 
 public enum PlayerColor

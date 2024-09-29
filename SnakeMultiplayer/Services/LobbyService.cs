@@ -33,6 +33,7 @@ public interface ILobbyService
 public class LobbyService : ILobbyService
 {
     public string ID { get; private set; }
+    public int ObstacleCount { get; private set; }
     public LobbyStates State { get; private set; }
     public bool IsTimer { get; private set; }
     public Speed Speed { get => Arena.Speed; }
@@ -44,13 +45,14 @@ public class LobbyService : ILobbyService
     readonly int MaxPlayers;
     readonly string HostPlayer;
 
-    public LobbyService(string id, string host, int maxPlayers)
+    public LobbyService(string id, int obstacleCount, string host, int maxPlayers)
     {
         ID = id;
+        ObstacleCount = obstacleCount;
         HostPlayer = host;
         State = LobbyStates.Idle;
         MaxPlayers = maxPlayers;
-        Arena = new Arena(players);
+        Arena = new Arena(players, obstacleCount);
     }
 
     public string AddPlayer(string playerName)

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 
 using JsonLibrary.FromClient;
 using JsonLibrary.FromServer;
+
+using SnakeMultiplayer.Models;
 
 namespace SnakeMultiplayer.Services;
 
@@ -21,18 +24,26 @@ public class Arena
     int Height;
     bool IsWall;
     Coordinate Food;
+    Obstacle[] Obstacles;
 
-    public Arena(ConcurrentDictionary<string, Snake> players)
+    public Arena(ConcurrentDictionary<string, Snake> players, int obstacleCount=2)
     {
         Snakes = players;
         PendingActions = new ConcurrentDictionary<string, MoveDirection>();
         Food = null;
+        Obstacles = new Obstacle[obstacleCount];
         Speed = Speed.Normal;
     }
 
     public ArenaStatus GenerateReport()
     {
-        var report = new ArenaStatus(Food == null ? null : new XY(Food.X, Food.Y));
+        obstacleXY[] obstaclesArray = Obstacles.Select(o => new obstacleXY(new XY(o.Position.X, o.Position.Y), o.Color)).ToArray();
+
+        // Create an ArenaStatus instance with food and obstacles
+        var report = new ArenaStatus(
+            Food == null ? null : new XY(Food.X, Food.Y),
+            obstaclesArray
+        );
         foreach (var snake in Snakes)
         {
             if (snake.Value == null)
@@ -77,6 +88,9 @@ public class Arena
         while (!isFoodSet)
         {
             var newFood = new Coordinate(Random.Next(0, Width), Random.Next(0, Height));
+            //var containsSnake = Snakes.Values.Any(snake => snake.Contains(newFood));
+            //var isObstacleCell = Board[newFood.X, newFood.Y] == Cells.obstacle;
+
             contains = false;
             foreach (var snake in Snakes.Values)
             {
@@ -96,6 +110,32 @@ public class Arena
         //TODO: Player won? Refactor to better logic.
         throw new Exception("Could not set food");
     }
+
+    public void GenerateObstacles()
+    {
+        for (int i = 0; i < Obstacles.Count(); i++)
+        {
+            bool isObstacleSet = false;
+
+            while (!isObstacleSet)
+            {
+                var newObstacle = new Coordinate(Random.Next(0, Width), Random.Next(0, Height));
+
+                // Ensure the obstacle isn't on a snake or food
+                var containsSnake = Snakes.Values.Any(snake => snake.Contains(newObstacle));
+                var isFoodCell = Board[newObstacle.X, newObstacle.Y] == Cells.food;
+
+                if (!containsSnake && !isFoodCell)
+                {
+                    Obstacles[i] = new Obstacle(newObstacle); // Set obstacle in the array
+                    Board[newObstacle.X, newObstacle.Y] = Cells.obstacle; // Mark the board cell as an obstacle
+                    isObstacleSet = true;
+                }
+            }
+        }
+    }
+
+
 
     public Settings SetSettings(Settings settings)
     {
@@ -166,6 +206,7 @@ public class Arena
         }
 
         GenerateFood(true);
+        GenerateObstacles();
 
         return string.Empty;
     }
