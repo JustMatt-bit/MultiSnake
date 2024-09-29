@@ -28,6 +28,7 @@ public interface ILobbyService
     Settings SetSettings(Settings settings);
     ArenaStatus InitiateGameStart();
     List<Player> RemovePlayer(string playerName);
+    void RecordPlayerScores(IScoringService scoringService);
 }
 
 public class LobbyService : ILobbyService
@@ -197,5 +198,12 @@ public class LobbyService : ILobbyService
         }
 
         throw new InvalidOperationException("Cannot find unused player color, because all are used.");
+    }
+    public void RecordPlayerScores(IScoringService scoringService) {
+        Dictionary<string, int> scores = Arena.GetScores();
+        foreach (var score in scores)
+        {
+            scoringService.RecordScore(score.Key, score.Value);
+        }
     }
 }

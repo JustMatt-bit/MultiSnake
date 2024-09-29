@@ -140,9 +140,12 @@ class GameController {
             var tail = snakesArray[i].tail;
             var player = snakesArray[i].player;
             var color = snakesArray[i].color;
+            var score = snakesArray[i].score;
+            console.log(`Updating score for ${player}: ${score}`);
 
             this.snakes[player].updateCoord(head, tail);
             this.cellContainer.updateSnake(color, head, tail);
+            updatePlayerScore(player, score); // Update the player's score
         }
 
         // Unpaint inactive snakes
@@ -222,4 +225,18 @@ function htmlEscape(str) {
         .replace(/'/g, '&#39;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
+}
+
+// Function to update player scores in the DOM
+function updatePlayerScore(player, score) {
+    const playerScoreElement = document.getElementById(`score-${player}`);
+    if (playerScoreElement) {
+        playerScoreElement.textContent = `${player}: Score: ${score}`;
+    } else {
+        // Create a new element if it doesn't exist
+        const newScoreElement = document.createElement('div');
+        newScoreElement.id = `score-${player}`;
+        newScoreElement.textContent = `${player}: Score: ${score}`;
+        document.getElementById('scoreBoard').appendChild(newScoreElement);
+    }
 }

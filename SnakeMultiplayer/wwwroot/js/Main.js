@@ -20,6 +20,7 @@
     MainDispatcher.on("onWebSocketOpened", EnableHostButtons.bind(this));
     MainDispatcher.on("onWebSocketClosed", redirectToErrorPage.bind(this)); // to be implemented
     MainDispatcher.on("onSettingsReceived", onUpdateSettings.bind(this));
+    MainDispatcher.on("onPlayerScoreUpdate", updatePlayerScore.bind(this));
 
     var gameController = new GameController(PlayerName, LobbyId, MainDispatcher);
     gameController.setEnvironment();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 
 using JsonLibrary.FromClient;
@@ -15,6 +16,7 @@ public class Arena
     readonly ConcurrentDictionary<string, Snake> Snakes;
     readonly ConcurrentDictionary<string, MoveDirection> PendingActions;
 
+    ConcurrentDictionary<string, int> Scores;
     ConcurrentDictionary<string, MoveDirection> PreviousActions;
     Cells[,] Board;
     int Width;
@@ -26,6 +28,7 @@ public class Arena
     {
         Snakes = players;
         PendingActions = new ConcurrentDictionary<string, MoveDirection>();
+        Scores = new ConcurrentDictionary<string, int>();
         Food = null;
         Speed = Speed.Normal;
     }
@@ -48,7 +51,8 @@ public class Arena
                 var head = snake.Value.CloneHead().ConvertToXY();
                 var tail = snake.Value.Tail?.ConvertToXY();
                 var color = snake.Value.GetColorString();
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail);
+                var score = GetScore(snake.Key);
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score);
                 report.AddActiveSnake(tempSnake);
             }
         }
@@ -232,6 +236,8 @@ public class Arena
             {
                 Food = null;
                 moveResult = snake.Value.Move(currAction, true);
+                Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+                Console.WriteLine($"Player {snake.Key} scored. Current score: {Scores[snake.Key]}");
             }
             else
             {
@@ -289,4 +295,16 @@ public class Arena
             InitialPosition.DownRight => MoveDirection.Up,
             _ => MoveDirection.None,
         };
+
+    public int GetScore(string playerName) {
+        if (Scores.TryGetValue(playerName, out var score))
+        {
+            return score;
+        }
+        return 0;
+    }
+
+    public Dictionary<string, int> GetScores() {
+        return new Dictionary<string, int>(Scores);
+    }
 }

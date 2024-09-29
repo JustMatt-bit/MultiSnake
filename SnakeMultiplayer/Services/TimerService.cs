@@ -13,12 +13,14 @@ namespace SnakeMultiplayer.Services
         readonly Dictionary<string, Timer> Timers = new();
         readonly IGameServerService GameServer;
         readonly IServerHub ServerHub;
+        readonly IScoringService ScoringService;
 
 
-        public TimerService(IGameServerService gameServer, IServerHub serverHub)
+        public TimerService(IGameServerService gameServer, IServerHub serverHub, IScoringService scoringService)
         {
             GameServer = gameServer;
             ServerHub = serverHub;
+            ScoringService = scoringService;
         }
 
         Timer GetTimer(string name) => Timers.TryGetValue(name, out var timer) ? timer : null;
@@ -53,7 +55,7 @@ namespace SnakeMultiplayer.Services
             GetTimer(lobby)?.Stop();
             _ = Timers.Remove(lobby);
 
-            GameServer.EndGame(lobby);
+            GameServer.EndGame(lobby, ScoringService);
             _ = ServerHub.SendEndGame(lobby);
         }
     }

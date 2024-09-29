@@ -21,6 +21,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 builder.Services.AddSingleton<IGameServerService, GameServerService>();
 builder.Services.AddSingleton<ITimerService, TimerService>();
+builder.Services.AddSingleton<IScoringService, ScoringService>();
 builder.Services.AddTransient<IServerHub, ServerHub>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddSignalR();
@@ -46,6 +47,12 @@ else
     if (!File.Exists(usersFileName))
     {
         File.Create(usersFileName).Dispose();
+    }
+    
+    var scoresFileName = builder.Configuration["ScoresFileName"];
+    if (!File.Exists(scoresFileName))
+    {
+        File.Create(scoresFileName).Dispose();
     }
 }
 

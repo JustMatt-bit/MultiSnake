@@ -9,7 +9,7 @@ public interface IGameServerService
 {
     string AddPlayerToLobby(string lobby, string player);
     string CanJoin(string lobbyName, string playerName);
-    void EndGame(string lobby);
+    void EndGame(string lobby, IScoringService scoringService);
     ILobbyService GetLobbyService(string lobby);
     List<Tuple<string, string>> GetLobbyStatus();
     bool LobbyExists(string lobbyName);
@@ -58,10 +58,12 @@ public class GameServerService : IGameServerService
             ? lobby.PlayerExists(playerName)
         : throw new EntryPointNotFoundException($"Lobby {lobbyName} does not exists");
 
-    public void EndGame(string lobby)
+    public void EndGame(string lobby, IScoringService scoringService)
     {
-        if (lobbies.TryGetValue(lobby, out var lobbyService))
+        if (lobbies.TryGetValue(lobby, out var lobbyService)) {
+            lobbyService.RecordPlayerScores(scoringService);
             lobbyService.EndGame();
+        }
     }
 
     public void RemoveLobby(string lobby)
