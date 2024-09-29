@@ -32,14 +32,16 @@ public class Snake
 {
     public string player { get; set; }
     public string color { get; set; }
+    public int score { get; set; }
     public XY head { get; set; }
     public XY tail { get; set; }
-    public Snake(string player, string color, XY head, XY tail)
+    public Snake(string player, string color, XY head, XY tail, int score = 0)
     {
         this.player = player;
         this.color = color;
         this.head = head;
         this.tail = tail;
+        this.score = score;
     }
 }
 

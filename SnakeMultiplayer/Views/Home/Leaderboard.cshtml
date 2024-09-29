@@ -1,0 +1,40 @@
+@model IEnumerable<SnakeMultiplayer.Models.UserScore>
+
+@{
+    ViewData["Title"] = "Leaderboard";
+    var currentUser = User.Identity.Name; // Get the current user's name
+}
+
+<h2>Leaderboard</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Username</th>
+            <th>Highest Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            var rank = 1;
+            foreach (var userScore in Model.OrderByDescending(u => u.HighestScore))
+            {
+                var isCurrentUser = userScore.Username == currentUser;
+                <tr class="@(isCurrentUser ? "table-success" : "")">
+                    <td>@rank</td>
+                    <td>@userScore.Username</td>
+                    <td>@userScore.HighestScore</td>
+                </tr>
+                rank++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3">No scores available</td>
+            </tr>
+        }
+    </tbody>
+</table>

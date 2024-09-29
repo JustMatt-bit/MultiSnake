@@ -6,4 +6,5 @@ UML/
 .vs/
 appsettings.json
 *.csproj.user
+SnakeMultiplayer/scores.txt
 SnakeMultiplayer/users.txt
