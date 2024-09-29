@@ -15,13 +15,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.14/signalr.min.js"></script>
 </head>
 <body>
-    <nav id="navigation_bar" class="navbar navbar-expand-md navbar-light bg-light">
-        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-        <a class="nav-item nav-link bg-light" asp-area="" asp-controller="Lobby" asp-action="JoinLobby">Join</a>
-        <a class="nav-item nav-link bg-light" asp-area="" asp-controller="Lobby" asp-action="CreateLobby">Create</a>
-        <a class="nav-item nav-link bg-light" asp-area="" asp-controller="Home" asp-action="About">About</a>
+    <nav id="navigation_bar" class="navbar navbar-expand-md navbar-light bg-light d-flex justify-content-between">
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="d-flex flex-row">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    <a class="nav-item nav-link bg-light" asp-area="" asp-controller="Lobby" asp-action="JoinLobby">Join</a>
+                    <a class="nav-item nav-link bg-light" asp-area="" asp-controller="Lobby" asp-action="CreateLobby">Create</a>
+                    <a class="nav-item nav-link bg-light" asp-area="" asp-controller="Home" asp-action="About">About</a>
+                </div>
+                <div class="d-flex flex-row justify-content-between px-3 py-2" style="gap: 10px">
+                    <p style="margin: 0">Welcome, @User.Identity.Name!</p>
+                    <a asp-controller="Account" asp-action="Logout">Logout</a>
+                </div>
+            }
     </nav>
-
     <div class="container" style="height:100vh">
         @RenderBody()
     </div>

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using SnakeMultiplayer.Services;
 
 namespace SnakeMultiplayer.Controllers;
 
+[Authorize]
 public class LobbyController : Controller
 {
     private static readonly string InvalidStringErrorMessage = @"Please use only letters, numbers and spaces only between words. ";
@@ -16,8 +18,9 @@ public class LobbyController : Controller
     public IActionResult CreateLobby() => View();
 
     [HttpPost]
-    public IActionResult CreateLobby([FromServices] IGameServerService gameServer, string id = "", string playerName = "")
+    public IActionResult CreateLobby([FromServices] IGameServerService gameServer, string id = "")
     {
+        string playerName = User.Identity.Name;
         ViewData["playerName"] = playerName;
         ViewData["lobbyId"] = id;
 
@@ -49,8 +52,9 @@ public class LobbyController : Controller
     }
 
     [HttpPost]
-    public IActionResult JoinLobby([FromServices] IGameServerService gameServer, string id = "", string playerName = "")
+    public IActionResult JoinLobby([FromServices] IGameServerService gameServer, string id = "")
     {
+        string playerName = User.Identity.Name;
         ViewData["playerName"] = playerName;
         ViewData["lobbyId"] = id;
 
