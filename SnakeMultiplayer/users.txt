@@ -1,3 +1,0 @@
-markas:$2a$11$mPukMT4tIRWOTQNW24QXm.wNKUeawLMUwYsGtce36InWeF7qDr1ha
-testing:$2a$11$9UdF0gGHY6NcIYZc99VxXO2lk5K5dQXeyvMn9JqVJrhOUmsrhMwUu
-abc:$2a$11$V46kUV.pkKqUfaJleStAjO1fvC7ApXah44rZ6SgKWxvVAF2tJrCqO
