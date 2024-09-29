@@ -10,10 +10,12 @@ public class ArenaStatus
     public List<Snake> ActiveSnakes { get; set; }
     public List<string> DisabledSnakes { get; set; }
     public XY food { get; set; }
+    public obstacleXY[] obstacles { get; set; }
 
-    public ArenaStatus(XY food)
+    public ArenaStatus(XY food, obstacleXY[] obstacles)
     {
         this.food = food;
+        this.obstacles = obstacles;
         ActiveSnakes = new List<Snake>();
         DisabledSnakes = new List<string>();
     }
@@ -40,6 +42,19 @@ public class Snake
         this.tail = tail;
     }
 }
+
+[JsonObject]
+public class obstacleXY
+{
+    public XY position { get; set; }
+    public string color { get; set; }
+    public obstacleXY(XY position, string color)
+    {
+        this.position = position;
+        this.color = color;
+    }
+}
+
 [JsonObject]
 public class XY
 {

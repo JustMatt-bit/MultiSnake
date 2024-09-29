@@ -110,6 +110,14 @@ class GameController {
             this.cellContainer.drawCell(food.x, food.y, "black");
         }
 
+        // Draw obstacles
+        const obstacles = startMessage.obstacles;
+        if (obstacles) {
+            for (const obstacle of obstacles) {
+                this.cellContainer.drawCell(obstacle.position.x, obstacle.position.y, obstacle.color);
+            }
+        }
+
         var snakesArray = startMessage.activeSnakes;
         var i;
         for (i = 0; i < snakesArray.length; i++) {
