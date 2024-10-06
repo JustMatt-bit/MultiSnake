@@ -15,7 +15,7 @@ public interface IGameServerService
     bool LobbyExists(string lobbyName);
     bool PlayerExists(string lobbyName, string playerName);
     void RemoveLobby(string lobby);
-    bool TryCreateLobby(string lobbyName, int obstacleCount, string hostPlayerName, IGameServerService service, int level);
+    bool TryCreateLobby(string lobbyName, string hostPlayerName, IGameServerService service, int level);
 }
 
 /// <summary>

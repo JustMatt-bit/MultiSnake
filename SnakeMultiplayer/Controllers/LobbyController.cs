@@ -32,7 +32,7 @@ public class LobbyController : Controller
             return View();
         }
 
-        if (!gameServer.TryCreateLobby(id, level, playerName, gameServer, level))
+        if (!gameServer.TryCreateLobby(id, playerName, gameServer, level))
         {
             ViewData["ErrorMessage"] = $"Lobby with {id} already exists. Please enter different name";
             return View();
