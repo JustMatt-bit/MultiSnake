@@ -46,14 +46,15 @@ public class LobbyService : ILobbyService
     readonly int MaxPlayers;
     readonly string HostPlayer;
 
-    public LobbyService(string id, int obstacleCount, string host, int maxPlayers)
+    public LobbyService(string id, int obstacleCount, string host, int maxPlayers, int level)
     {
         ID = id;
         ObstacleCount = obstacleCount;
         HostPlayer = host;
         State = LobbyStates.Idle;
         MaxPlayers = maxPlayers;
-        Arena = new Arena(players, obstacleCount);
+        IArenaFactory factory = ArenaFactoryProvider.GetFactory(level);
+        Arena = factory.CreateArena(players);
     }
 
     public string AddPlayer(string playerName)
