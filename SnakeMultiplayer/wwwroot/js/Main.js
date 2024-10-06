@@ -37,28 +37,6 @@
         document.getElementById("startButton").onclick = onStartGameButtonClick.bind(this);
     }
 
-    if (document.getElementById("SlowSpeedBtn") !== null) {
-        document.getElementById("SlowSpeedBtn").addEventListener('click', function () {
-            gameController.sendSettingUpdate({ speed: "Slow" });
-        })
-    }
-
-    if (document.getElementById("NormalSpeedBtn") !== null) {
-        document.getElementById("NormalSpeedBtn").addEventListener('click', function () {
-            gameController.sendSettingUpdate({ speed: "Normal" });
-        })
-    }
-    if (document.getElementById("FastSpeedBtn") !== null) {
-        document.getElementById("FastSpeedBtn").addEventListener('click', function () {
-            gameController.sendSettingUpdate({ speed: "Fast" });
-        })
-    }
-    if (document.getElementById("NoSpeedBtn") !== null) {
-        document.getElementById("NoSpeedBtn").addEventListener('click', function () {
-            gameController.sendSettingUpdate({ speed: "NoSpeed" });
-        })
-    }
-
     var keyDownController = {};
 
     document.onkeydown = function (e) {
@@ -143,16 +121,10 @@
         if (document.getElementById("startButton") !== null) {
             document.getElementById("startButton").disabled = false;
         }
-        if (document.getElementById("SpeedBtn") !== null) {
-            document.getElementById("SpeedBtn").disabled = false;
-        }
     }
     function DisableHostButtons() {
         if (document.getElementById("startButton") !== null) {
             document.getElementById("startButton").disabled = true;
-        }
-        if (document.getElementById("SpeedBtn") !== null) {
-            document.getElementById("SpeedBtn").disabled = true;
         }
     }
 
@@ -161,9 +133,6 @@
         var speed;
         if (settings !== null || settings.speed !== null) {
             speed = settings.speed;
-            var speedBtn = document.getElementById("SpeedBtn");
-            if (speedBtn != null)
-                speedBtn.textContent = "Speed: " + speed;
         }
     }
 

@@ -5,7 +5,7 @@
     string errorMessage = ViewData["ErrorMessage"] == null ? string.Empty : (string)ViewData["ErrorMessage"];
     //string playerName = ViewData["playerName"] == null ? string.Empty : (string)ViewData["playerName"];
     string lobbyName = ViewData["lobbyId"] == null ? string.Empty : (string)ViewData["lobbyId"];
-    int obstacleCount = ViewData["lobbyId"] == null ? 0 : (int)ViewData["obstacleCount"];
+    int level = ViewData["level"] == null ? 0 : (int)ViewData["level"];
 }
 
 
@@ -27,8 +27,12 @@
                 <label> New lobby name:</label>
                 <input type="text" class="form-control" name="id" value="@lobbyName">
                 <br/>
-                <label> Number of obstacles:</label>
-                <input type="number" class="form-control" min="0" max="10" name="obstacleCount" value="@obstacleCount">
+                <label> Select level:</label>
+                <select class="form-control" name="level">
+                    <option value="1">Level 1</option>
+                    <option value="2">Level 2</option>
+                    <option value="3">Level 3</option>
+                </select>
                 <br />
                 <button type="submit" class="btn btn-primary btn-block">Create</button>
             </form>
