@@ -15,7 +15,7 @@ public interface IGameServerService
     bool LobbyExists(string lobbyName);
     bool PlayerExists(string lobbyName, string playerName);
     void RemoveLobby(string lobby);
-    bool TryCreateLobby(string lobbyName, int obstacleCount, string hostPlayerName, IGameServerService service);
+    bool TryCreateLobby(string lobbyName, string hostPlayerName, IGameServerService service, int level);
 }
 
 /// <summary>
@@ -43,8 +43,8 @@ public class GameServerService : IGameServerService
         }
     }
 
-    public bool TryCreateLobby(string lobbyName, int obstacleCount, string hostPlayerName, IGameServerService service)
-        => lobbies.TryAdd(lobbyName, new LobbyService(lobbyName, obstacleCount, hostPlayerName, MaxPlayersInLobby));
+    public bool TryCreateLobby(string lobbyName, int obstacleCount, string hostPlayerName, IGameServerService service, int level)
+        => lobbies.TryAdd(lobbyName, new LobbyService(lobbyName, obstacleCount, hostPlayerName, MaxPlayersInLobby, level));
 
     public string CanJoin(string lobbyName, string playerName) =>
         !lobbies.TryGetValue(lobbyName, out var lobby)

@@ -27,14 +27,14 @@ public class Arena
     Coordinate Food;
     Obstacle[] Obstacles;
 
-    public Arena(ConcurrentDictionary<string, Snake> players, int obstacleCount)
+    public Arena(ConcurrentDictionary<string, Snake> players, int obstacleCount, Speed speed)
     {
         Snakes = players;
         PendingActions = new ConcurrentDictionary<string, MoveDirection>();
         Scores = new ConcurrentDictionary<string, int>();
         Food = null;
         Obstacles = new Obstacle[obstacleCount];
-        Speed = Speed.Normal;
+        Speed = speed;
     }
 
     public ArenaStatus GenerateReport()
@@ -147,12 +147,6 @@ public class Arena
         {
             IsWall = true;
 
-        }
-
-        //TODO: this shouldn't be here.
-        if (Enum.TryParse(settings?.speed, out Speed parsedSpeed))
-        {
-            Speed = parsedSpeed;
         }
 
         return new Settings(Width, IsWall, Speed.ToString());
