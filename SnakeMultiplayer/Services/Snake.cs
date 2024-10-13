@@ -2,19 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using SnakeMultiplayer.Services.Strategies.Movement;
+
 namespace SnakeMultiplayer.Services;
 
 public class Snake
 {
     private LinkedList<Coordinate> body;
+    public IMovementStrategy movementStrategy { get; set; }
     public readonly PlayerColor color;
     public bool IsActive { get; private set; }
     public Coordinate Tail { get; private set; }
 
-    public Snake(PlayerColor color)
+    public Snake(PlayerColor color, IMovementStrategy strategy)
     {
         this.color = color;
         body = new LinkedList<Coordinate>();
+        movementStrategy = strategy;
     }
 
     public void SetInitialPosition(Coordinate coordinate)
@@ -37,17 +41,21 @@ public class Snake
             _ = new Tuple<Coordinate, Coordinate>(null, null);
         }
 
-        var newPosition = body.First.Value.Clone();
-        newPosition.Update(direction);
-        _ = body.AddFirst(newPosition);
-        Tail = null;
+        Console.WriteLine(movementStrategy.ToString());
+        var result = movementStrategy.Move(body, Tail, direction, isFood);
+        Tail = result.Item2;
 
-        if (!isFood)
-        {
-            Tail = body.Last.Value.Clone();
-            body.RemoveLast();
-        }
-        return new Tuple<Coordinate, Coordinate>(CloneHead(), Tail);
+        //var newPosition = body.First.Value.Clone();
+        //newPosition.Update(direction);
+        //_ = body.AddFirst(newPosition);
+        //Tail = null;
+
+        //if (!isFood)
+        //{
+        //    Tail = body.Last.Value.Clone();
+        //    body.RemoveLast();
+        //}
+        return new Tuple<Coordinate, Coordinate>(CloneHead(result.Item1), Tail);
     }
     /// <summary>
     /// Check whether direction is valid.
@@ -69,6 +77,12 @@ public class Snake
         body == null || body.First.Value == null
         ? null
         : body.First.Value.Clone();
+
+    public Coordinate CloneHead(LinkedList<Coordinate> body) =>
+    body == null || body.First.Value == null
+    ? null
+    : body.First.Value.Clone();
+
 
     public List<Coordinate> GetCoordinates() => body?.ToList<Coordinate>();
 

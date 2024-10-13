@@ -118,6 +118,11 @@ class GameController {
             }
         }
 
+        const strategyCell = startMessage.strategyCell;
+        if (strategyCell) {
+            this.cellContainer.drawCell(strategyCell.position.x, strategyCell.position.y, strategyCell.color)
+        }
+
         var snakesArray = startMessage.activeSnakes;
         var i;
         for (i = 0; i < snakesArray.length; i++) {

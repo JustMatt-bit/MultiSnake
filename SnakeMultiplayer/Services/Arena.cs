@@ -2,11 +2,13 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 using JsonLibrary.FromClient;
 using JsonLibrary.FromServer;
 
 using SnakeMultiplayer.Models;
+using SnakeMultiplayer.Services.Strategies.Movement;
 
 namespace SnakeMultiplayer.Services;
 
@@ -26,6 +28,7 @@ public class Arena
     bool IsWall;
     Coordinate Food;
     Obstacle[] Obstacles;
+    StrategyCell StrategyCell;
 
     public Arena(ConcurrentDictionary<string, Snake> players, int obstacleCount, Speed speed)
     {
@@ -44,8 +47,10 @@ public class Arena
         // Create an ArenaStatus instance with food and obstacles
         var report = new ArenaStatus(
             Food == null ? null : new XY(Food.X, Food.Y),
-            obstaclesArray
+            obstaclesArray,
+            strategyCell: new StrategyCellXY(new XY(StrategyCell.Position.X, StrategyCell.Position.Y), StrategyCell.Color)
         );
+
         foreach (var snake in Snakes)
         {
             if (snake.Value == null)
@@ -100,6 +105,7 @@ public class Arena
                 return; // Set the flag to exit the loop
             }
         }
+
         //TODO: Player won? Refactor to better logic.
         throw new Exception("Could not set food");
     }
@@ -128,7 +134,24 @@ public class Arena
         }
     }
 
+    public void GenerateStrategyCell()
+    {
+        bool isStrategyCellSet = false;
+        while (!isStrategyCellSet)
+        {
+            var newStrategyCell = new Coordinate(Random.Next(0, Width), Random.Next(0, Height));
+            var containsSnake = Snakes.Values.Any(snake => snake.Contains(newStrategyCell));
+            var isFoodCell = Board[newStrategyCell.X, newStrategyCell.Y] == Cells.food;
+            bool isObstacleCell = Obstacles.Any(obstacle => obstacle.Position.X == newStrategyCell.X && obstacle.Position.Y == newStrategyCell.Y);
 
+            if (!containsSnake && !isFoodCell && !isObstacleCell)
+            {
+                StrategyCell = new StrategyCell(newStrategyCell);
+                Board[newStrategyCell.X, newStrategyCell.Y] = Cells.strategyChange;
+                isStrategyCellSet = true;
+            }
+        }
+    }
 
     public Settings SetSettings(Settings settings)
     {
@@ -194,6 +217,7 @@ public class Arena
 
         GenerateFood(true);
         GenerateObstacles();
+        GenerateStrategyCell();
 
         return string.Empty;
     }
@@ -218,6 +242,7 @@ public class Arena
             }
 
             Snakes[player].SetInitialPosition(initCoord);
+            Snakes[player].movementStrategy = new DefaultMovementStrategy(); // TEST
 
             _ = PendingActions.TryAdd(player, GetMoveDirection(initPos));
         }
@@ -229,6 +254,16 @@ public class Arena
     public void UpdateActions()
     {
         RefreshPendingActions();
+
+        for (int i = 0; i < Board.GetLength(0); i++)
+        {
+            for (int j = 0; j < Board.GetLength(1); j++)
+            {
+                Console.Write($"{Board[j, i]} ");
+            }
+            Console.WriteLine(); // New line after each row
+        }
+
 
         foreach (var snake in Snakes)
         {
@@ -262,6 +297,26 @@ public class Arena
                 moveResult = snake.Value.Move(currAction, true);
                 Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
                 Console.WriteLine($"Player {snake.Key} scored. Current score: {Scores[snake.Key]}");
+            }
+            else if (Board[newHead.X, newHead.Y].Equals(Cells.strategyChange))
+            {
+                snake.Value.movementStrategy = new InverseMovementStrategy();
+                moveResult = snake.Value.Move(currAction, true);
+                Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+            }
+            else if (Board[newHead.X, newHead.Y].Equals(Cells.snake))
+            {
+                if (snake.Value.movementStrategy is InverseMovementStrategy)
+                {
+                    moveResult = snake.Value.Move(currAction, false);
+                    Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+                }
+                else
+                {
+                    snake.Value.Deactivate();
+                    continue;
+                }
+                Board[2, 2] = Cells.food;
             }
             else
             {
