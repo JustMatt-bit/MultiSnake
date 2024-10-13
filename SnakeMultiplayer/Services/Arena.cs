@@ -186,7 +186,7 @@ public class Arena
     public string PrepareForNewGame()
     {
         Board = new Cells[Width, Height];
-
+        Scores = new ConcurrentDictionary<string, int>();
         if (!SetInitialPositionsAndActions())
         {
             return "Could not set initial positions";

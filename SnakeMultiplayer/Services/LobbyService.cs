@@ -9,7 +9,7 @@ using JsonLibrary.FromServer;
 
 namespace SnakeMultiplayer.Services;
 
-public interface ILobbyService
+public interface ILobbyService : ISubject
 {
     LobbyStates State { get; }
     Speed Speed { get; }
@@ -41,6 +41,8 @@ public class LobbyService : ILobbyService
 
     readonly ConcurrentDictionary<string, Snake> players = new();
 
+    private List<IObserver> observers = new List<IObserver>();
+
     readonly Arena Arena;
     readonly int MaxPlayers;
     readonly string HostPlayer;
@@ -53,6 +55,27 @@ public class LobbyService : ILobbyService
         MaxPlayers = maxPlayers;
         IArenaFactory factory = ArenaFactoryProvider.GetFactory(level);
         Arena = factory.CreateArena(players);
+    }
+     public void RegisterObserver(IObserver observer)
+    {
+        if (!observers.Contains(observer))
+        {
+            observers.Add(observer);
+        }
+    }
+
+    public void RemoveObserver(IObserver observer)
+    {
+        observers.Remove(observer);
+    }
+
+    public void NotifyObservers(string operation, string record)
+    {
+        var currentObservers = new List<IObserver>(observers);
+        foreach (var observer in currentObservers)
+        {
+            observer.Update(operation, this);
+        }
     }
 
     public string AddPlayer(string playerName)
@@ -92,10 +115,13 @@ public class LobbyService : ILobbyService
     public ArenaStatus UpdateLobbyState()
     {
         Arena.UpdateActions();
-
+        if(Arena.GetScores().Any(score => score.Value >= 10)){
+            Arena.GenerateReport();
+            NotifyObservers("end", "end");
+        }
         if (!IsGameEnd())
             return Arena.GenerateReport();
-
+        
         State = LobbyStates.Idle;
         return null;
     }
