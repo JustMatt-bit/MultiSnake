@@ -28,10 +28,6 @@ namespace SnakeMultiplayer.Services.Strategies.Movement
                 tail = body.Last.Value.Clone();
                 body.RemoveLast();
             }
-            else
-            {
-                Console.WriteLine("maistas");
-            }
 
             return new Tuple<LinkedList<Coordinate>, Coordinate>(body, tail);
         }

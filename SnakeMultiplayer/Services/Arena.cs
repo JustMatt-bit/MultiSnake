@@ -96,9 +96,10 @@ public class Arena
             // Check if the newFood position is occupied by a snake or an obstacle
             bool containsSnake = Snakes.Values.Any(snake => snake.Contains(newFood));
             bool isObstacleCell = Obstacles.Any(obstacle => obstacle.Position.X == newFood.X && obstacle.Position.Y == newFood.Y);
+            bool isStrategyCell = newFood.X == StrategyCell.Position.X && newFood.Y == StrategyCell.Position.Y;
 
             // If it's not occupied by a snake or an obstacle, set the food
-            if (!containsSnake && !isObstacleCell)
+            if (!containsSnake && !isObstacleCell && !isStrategyCell)
             {
                 Food = newFood;
                 Board[newFood.X, newFood.Y] = Cells.food;
@@ -253,16 +254,17 @@ public class Arena
 
     public void UpdateActions()
     {
+        var random = new Random();
         RefreshPendingActions();
 
-        for (int i = 0; i < Board.GetLength(0); i++)
-        {
-            for (int j = 0; j < Board.GetLength(1); j++)
-            {
-                Console.Write($"{Board[j, i]} ");
-            }
-            Console.WriteLine(); // New line after each row
-        }
+        //for (int i = 0; i < Board.GetLength(0); i++)
+        //{
+        //    for (int j = 0; j < Board.GetLength(1); j++)
+        //    {
+        //        Console.Write($"{Board[j, i]} ");
+        //    }
+        //    Console.WriteLine(); // New line after each row
+        //}
 
 
         foreach (var snake in Snakes)
@@ -277,13 +279,38 @@ public class Arena
                 continue;
             }
 
-            var newHead = snake.Value.CloneHead();
-            newHead.Update(currAction);
+            var translatedAction = currAction;
 
-            if (newHead.X < 0 || Width <= newHead.X || newHead.Y < 0 || Width <= newHead.Y)
+            if (snake.Value.movementStrategy is InverseMovementStrategy)
             {
-                snake.Value.Deactivate();
-                continue;
+                translatedAction = currAction switch
+                {
+                    MoveDirection.Left => MoveDirection.Right,
+                    MoveDirection.Right => MoveDirection.Left,
+                    MoveDirection.Up => MoveDirection.Down,
+                    MoveDirection.Down => MoveDirection.Up,
+                    _ => throw new ArgumentException($"Argument value of enum CoordDirection expected, but {currAction} found"),
+                };
+            }
+
+
+
+            var newHead = snake.Value.CloneHead();
+            newHead.Update(translatedAction);
+
+            if (snake.Value.movementStrategy is WrapAroundStrategy)
+            {
+                newHead.X = (newHead.X + Width) % Width;
+                newHead.Y = (newHead.Y + Height) % Height;
+            }
+
+            if (snake.Value.movementStrategy is InverseMovementStrategy || snake.Value.movementStrategy is DefaultMovementStrategy)
+            {
+                if (newHead.X < 0 || Width <= newHead.X || newHead.Y < 0 || Width <= newHead.Y)
+                {
+                    snake.Value.Deactivate();
+                    continue;
+                }
             }
 
             Tuple<Coordinate, Coordinate> moveResult;
@@ -300,7 +327,15 @@ public class Arena
             }
             else if (Board[newHead.X, newHead.Y].Equals(Cells.strategyChange))
             {
-                snake.Value.movementStrategy = new InverseMovementStrategy();
+                var randomChoice = random.Next(2);
+
+                snake.Value.movementStrategy = randomChoice switch
+                {
+                    0 => new InverseMovementStrategy(),
+                    1 => new WrapAroundStrategy(Width, Height),
+                    _ => throw new Exception("Unexpected random choice for movement strategy"),
+                };
+
                 moveResult = snake.Value.Move(currAction, true);
                 Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
             }
@@ -316,7 +351,6 @@ public class Arena
                     snake.Value.Deactivate();
                     continue;
                 }
-                Board[2, 2] = Cells.food;
             }
             else
             {
@@ -329,7 +363,16 @@ public class Arena
                 continue;
             }
 
-            Board[moveResult.Item1.X, moveResult.Item1.Y] = Cells.snake;
+            if (Board[moveResult.Item1.X, moveResult.Item1.Y] == Cells.food)
+            {
+                Board[moveResult.Item1.X, moveResult.Item1.Y] = Cells.snake;
+                Food = null;
+            }
+            else
+            {
+                Board[moveResult.Item1.X, moveResult.Item1.Y] = Cells.snake;
+            }
+
             if (moveResult.Item2 != null)
             {   // snake tail must be removed
                 Board[moveResult.Item2.X, moveResult.Item2.Y] = Cells.empty;
