@@ -64,15 +64,6 @@ public class Arena
             else if (!snake.Value.IsActive)
             {
                 report.AddDisabledSnake(snake.Key);
-                // if (clonedSnakes.TryGetValue(snake.Key, out var snakeClone)) {
-                //     var head = snakeClone.CloneHead().ConvertToXY();
-                //     var tail = snakeClone.Tail?.ConvertToXY();
-                //     var color = snakeClone.GetColorString();
-                //     var score = GetScore(snake.Key);
-                //     var isStriped = snakeClone.IsStriped;
-                //     var tempSnakeToClone = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score, isStriped);
-                //     report.AddSnakeToRevive(tempSnakeToClone);
-                // }
             }
             else if (snake.Value.IsRevived) {
                 var head = snake.Value.CloneHead().ConvertToXY();
@@ -102,7 +93,7 @@ public class Arena
     {
         if (clonedSnakes.TryGetValue(playerName, out var clonedSnake))
         {
-            await Task.Delay(2000);
+            await Task.Delay(5000);
             Snakes[playerName] = clonedSnake;
             Snakes[playerName].IsRevived = true;
             Snakes[playerName].Activate();

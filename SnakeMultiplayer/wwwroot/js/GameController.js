@@ -171,10 +171,12 @@ class GameController {
         var snakesArray = updateMessage.disabledSnakes;
         for (i = 0; i < snakesArray.length; i++) {
             var player = snakesArray[i];
-
+            console.log(`Disabling snake: ${player}`);
             if (this.snakes[player] != null) {
                 this.cellContainer.clearCoords(this.snakes[player].getBodyArray());
+                
                 this.snakes[player] = null;
+                
             }
         }
 
