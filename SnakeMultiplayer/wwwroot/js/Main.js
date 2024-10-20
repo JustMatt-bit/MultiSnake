@@ -142,6 +142,8 @@
 
     function onGameStartRececeived(e) {
         var element = document.getElementById('Canvas');
+        var movementStrategyDisplay = document.getElementById('currentPlayerMovementStrategy');
+        movementStrategyDisplay.style.visibility = 'visible';
         element.style.visibility = 'visible';
         element.scrollIntoView({
             behavior: "smooth",
@@ -154,9 +156,11 @@
     async function onGameEndReceived(e) {
         await Sleep(3000);
         var element = document.getElementById('Canvas');
+        var movementStrategyDisplay = document.getElementById('currentPlayerMovementStrategy');
         console.log("canvas element:", element);
         //element.style.display = 'none'; //or
         element.style.visibility = 'hidden';
+        movementStrategyDisplay.style.visibility = 'hidden'
         document.getElementById('navigation_bar').scrollIntoView({
             behavior: "smooth",
             block: "start",

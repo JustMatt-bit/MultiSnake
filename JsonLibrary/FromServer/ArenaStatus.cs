@@ -11,13 +11,15 @@ public class ArenaStatus
     public List<string> DisabledSnakes { get; set; }
     public XY food { get; set; }
     public obstacleXY[] obstacles { get; set; }
+    public StrategyCellXY StrategyCell { get; set; }
 
-    public ArenaStatus(XY food, obstacleXY[] obstacles)
+    public ArenaStatus(XY food, obstacleXY[] obstacles, StrategyCellXY strategyCell)
     {
         this.food = food;
         this.obstacles = obstacles;
         ActiveSnakes = new List<Snake>();
         DisabledSnakes = new List<string>();
+        StrategyCell = strategyCell;
     }
     public void AddActiveSnake(Snake s) => ActiveSnakes.Add(s);
 
@@ -36,14 +38,16 @@ public class Snake
     public XY head { get; set; }
     public XY tail { get; set; }
     public bool isStriped { get; set; }
+    public string movementStrategy { get; set; }
 
-    public Snake(string player, string color, XY head, XY tail, int score = 0, bool stripes = false)
+    public Snake(string player, string color, string movementStrategy, XY head, XY tail, int score = 0, bool stripes = false)
     {
         this.player = player;
         this.color = color;
         this.head = head;
         this.tail = tail;
         this.score = score;
+        this.movementStrategy = movementStrategy;
         this.isStriped = stripes;
     }
 }
@@ -57,6 +61,18 @@ public class obstacleXY
     {
         this.position = position;
         this.color = color;
+    }
+}
+
+[JsonObject]
+public class StrategyCellXY
+{
+    public XY Position { get; set; }
+    public string Color { get; set; }
+    public StrategyCellXY(XY position, string color)
+    {
+        this.Position = position;
+        this.Color = color;
     }
 }
 
