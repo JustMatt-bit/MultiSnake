@@ -19,6 +19,7 @@ public class Arena
     readonly Random Random = new(Guid.NewGuid().GetHashCode());
     readonly ConcurrentDictionary<string, Snake> Snakes;
     readonly ConcurrentDictionary<string, MoveDirection> PendingActions;
+    readonly int _strategiesCount = 4;
 
     ConcurrentDictionary<string, int> Scores;
     ConcurrentDictionary<string, MoveDirection> PreviousActions;
@@ -67,7 +68,8 @@ public class Arena
                 var tail = snake.Value.Tail?.ConvertToXY();
                 var color = snake.Value.GetColorString();
                 var score = GetScore(snake.Key);
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score);
+                var currentMovingStrategy = snake.Value.GetMovementStrategy().ToString();
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, currentMovingStrategy, head, tail, score);
                 report.AddActiveSnake(tempSnake);
             }
         }
@@ -137,13 +139,18 @@ public class Arena
 
     public void GenerateStrategyCell()
     {
+        if (StrategyCell != null)
+        {
+            return;
+        }
+
         bool isStrategyCellSet = false;
         while (!isStrategyCellSet)
         {
             var newStrategyCell = new Coordinate(Random.Next(0, Width), Random.Next(0, Height));
             var containsSnake = Snakes.Values.Any(snake => snake.Contains(newStrategyCell));
             var isFoodCell = Board[newStrategyCell.X, newStrategyCell.Y] == Cells.food;
-            bool isObstacleCell = Obstacles.Any(obstacle => obstacle.Position.X == newStrategyCell.X && obstacle.Position.Y == newStrategyCell.Y);
+            var isObstacleCell = Obstacles.Any(obstacle => obstacle.Position.X == newStrategyCell.X && obstacle.Position.Y == newStrategyCell.Y);
 
             if (!containsSnake && !isFoodCell && !isObstacleCell)
             {
@@ -243,7 +250,7 @@ public class Arena
             }
 
             Snakes[player].SetInitialPosition(initCoord);
-            Snakes[player].movementStrategy = new DefaultMovementStrategy(); // TEST
+            Snakes[player].SetMovementStrategy(new DefaultMovementStrategy());
 
             _ = PendingActions.TryAdd(player, GetMoveDirection(initPos));
         }
@@ -256,16 +263,6 @@ public class Arena
     {
         var random = new Random();
         RefreshPendingActions();
-
-        //for (int i = 0; i < Board.GetLength(0); i++)
-        //{
-        //    for (int j = 0; j < Board.GetLength(1); j++)
-        //    {
-        //        Console.Write($"{Board[j, i]} ");
-        //    }
-        //    Console.WriteLine(); // New line after each row
-        //}
-
 
         foreach (var snake in Snakes)
         {
@@ -281,7 +278,7 @@ public class Arena
 
             var translatedAction = currAction;
 
-            if (snake.Value.movementStrategy is InverseMovementStrategy)
+            if (snake.Value.GetMovementStrategy() is InverseMovementStrategy)
             {
                 translatedAction = currAction switch
                 {
@@ -293,18 +290,28 @@ public class Arena
                 };
             }
 
-
+            if (snake.Value.GetMovementStrategy() is ZigZagMovementStrategy)
+            {
+                translatedAction = currAction switch
+                {
+                    MoveDirection.Up or MoveDirection.Down => MoveDirection.Left,
+                    MoveDirection.Left or MoveDirection.Right => MoveDirection.Up,
+                    _ => throw new ArgumentException($"Argument value of enum CoordDirection expected, but {currAction} found"),
+                };
+            }
 
             var newHead = snake.Value.CloneHead();
             newHead.Update(translatedAction);
 
-            if (snake.Value.movementStrategy is WrapAroundStrategy)
+            if (snake.Value.GetMovementStrategy() is WrapAroundMovementStrategy)
             {
                 newHead.X = (newHead.X + Width) % Width;
                 newHead.Y = (newHead.Y + Height) % Height;
             }
 
-            if (snake.Value.movementStrategy is InverseMovementStrategy || snake.Value.movementStrategy is DefaultMovementStrategy)
+            if (snake.Value.GetMovementStrategy() is InverseMovementStrategy || 
+                snake.Value.GetMovementStrategy() is DefaultMovementStrategy || 
+                snake.Value.GetMovementStrategy() is ZigZagMovementStrategy)
             {
                 if (newHead.X < 0 || Width <= newHead.X || newHead.Y < 0 || Width <= newHead.Y)
                 {
@@ -327,21 +334,25 @@ public class Arena
             }
             else if (Board[newHead.X, newHead.Y].Equals(Cells.strategyChange))
             {
-                var randomChoice = random.Next(2);
-
-                snake.Value.movementStrategy = randomChoice switch
+                StrategyCell = null;
+                var randomChoice = 3; // random.Next(_strategiesCount);
+                IMovementStrategy newMovementStrategy = randomChoice switch
                 {
                     0 => new InverseMovementStrategy(),
-                    1 => new WrapAroundStrategy(Width, Height),
+                    1 => new WrapAroundMovementStrategy(Width, Height),
+                    2 => new DefaultMovementStrategy(),
+                    3 => new ZigZagMovementStrategy(),
                     _ => throw new Exception("Unexpected random choice for movement strategy"),
                 };
 
-                moveResult = snake.Value.Move(currAction, true);
+                snake.Value.SetMovementStrategy(newMovementStrategy);
+
+                moveResult = snake.Value.Move(currAction, false);
                 Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
             }
             else if (Board[newHead.X, newHead.Y].Equals(Cells.snake))
             {
-                if (snake.Value.movementStrategy is InverseMovementStrategy)
+                if (snake.Value.GetMovementStrategy() is InverseMovementStrategy || snake.Value.GetMovementStrategy() is ZigZagMovementStrategy)
                 {
                     moveResult = snake.Value.Move(currAction, false);
                     Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
@@ -379,6 +390,7 @@ public class Arena
             }
         }
         GenerateFood(false);
+        GenerateStrategyCell();
     }
 
     public void SetPendingAction(string player, MoveDirection direction)

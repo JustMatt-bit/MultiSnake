@@ -20,5 +20,7 @@ namespace SnakeMultiplayer.Services.Strategies.Movement
 
             return new Tuple<LinkedList<Coordinate>, Coordinate>(body, Tail);
         }
+
+        public override string ToString() => "Default Movement";
     }
 }

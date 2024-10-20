@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace SnakeMultiplayer.Services.Strategies.Movement
 {
-    public class WrapAroundStrategy : IMovementStrategy
+    public class WrapAroundMovementStrategy : IMovementStrategy
     {
         private int width, height;
 
-        public WrapAroundStrategy(int width, int height)
+        public WrapAroundMovementStrategy(int width, int height)
         {
             this.width = width;
             this.height = height;
@@ -39,5 +39,8 @@ namespace SnakeMultiplayer.Services.Strategies.Movement
             // Return the updated body and the tail position (if the tail was removed)
             return new Tuple<LinkedList<Coordinate>, Coordinate>(body, tail);
         }
+
+        public override string ToString() => "Wrap Around Movement";
+
     }
 }

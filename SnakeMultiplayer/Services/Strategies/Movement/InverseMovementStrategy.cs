@@ -43,5 +43,8 @@ namespace SnakeMultiplayer.Services.Strategies.Movement
                 _ => throw new ArgumentException($"Argument value of enum CoordDirection expected, but {moveDirection} found"),
             };
         }
+
+        public override string ToString() => "Inverse Movement";
+
     }
 }

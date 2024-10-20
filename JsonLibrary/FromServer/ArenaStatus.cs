@@ -37,13 +37,15 @@ public class Snake
     public int score { get; set; }
     public XY head { get; set; }
     public XY tail { get; set; }
-    public Snake(string player, string color, XY head, XY tail, int score = 0)
+    public string movementStrategy { get; set; }
+    public Snake(string player, string color, string movementStrategy, XY head, XY tail, int score = 0)
     {
         this.player = player;
         this.color = color;
         this.head = head;
         this.tail = tail;
         this.score = score;
+        this.movementStrategy = movementStrategy;
     }
 }
 

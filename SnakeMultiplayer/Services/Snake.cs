@@ -9,7 +9,7 @@ namespace SnakeMultiplayer.Services;
 public class Snake
 {
     private LinkedList<Coordinate> body;
-    public IMovementStrategy movementStrategy { get; set; }
+    public IMovementStrategy MovementStrategy { get; private set; }
     public readonly PlayerColor color;
     public bool IsActive { get; private set; }
     public Coordinate Tail { get; private set; }
@@ -18,7 +18,7 @@ public class Snake
     {
         this.color = color;
         body = new LinkedList<Coordinate>();
-        movementStrategy = strategy;
+        MovementStrategy = strategy;
     }
 
     public void SetInitialPosition(Coordinate coordinate)
@@ -41,20 +41,9 @@ public class Snake
             _ = new Tuple<Coordinate, Coordinate>(null, null);
         }
 
-        Console.WriteLine(movementStrategy.ToString());
-        var result = movementStrategy.Move(body, Tail, direction, isFood);
+        var result = MovementStrategy.Move(body, Tail, direction, isFood);
         Tail = result.Item2;
 
-        //var newPosition = body.First.Value.Clone();
-        //newPosition.Update(direction);
-        //_ = body.AddFirst(newPosition);
-        //Tail = null;
-
-        //if (!isFood)
-        //{
-        //    Tail = body.Last.Value.Clone();
-        //    body.RemoveLast();
-        //}
         return new Tuple<Coordinate, Coordinate>(CloneHead(result.Item1), Tail);
     }
     /// <summary>
@@ -126,4 +115,11 @@ public class Snake
     }
 
     public string GetColorString() => Enum.GetName(typeof(PlayerColor), color);
+
+    public void SetMovementStrategy(IMovementStrategy strategy)
+    {
+        MovementStrategy = strategy;
+    }
+
+    public IMovementStrategy GetMovementStrategy() => MovementStrategy;
 }

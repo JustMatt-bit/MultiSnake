@@ -65,9 +65,7 @@ public class LobbyService : ILobbyService
             return reason;
         }
 
-        var movementStrategy = new DefaultMovementStrategy();
-
-        if (!players.TryAdd(playerName, new Snake(GetValidPlayerColor(), movementStrategy)))
+        if (!players.TryAdd(playerName, new Snake(GetValidPlayerColor(), new DefaultMovementStrategy())))
         {
             return "An error has occured. Please try again later.";
         }
