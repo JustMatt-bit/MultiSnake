@@ -9,6 +9,7 @@ public class ArenaStatus
 {
     public List<Snake> ActiveSnakes { get; set; }
     public List<string> DisabledSnakes { get; set; }
+    public List<Snake> SnakesToRevive { get; set; }
     public XY food { get; set; }
     public obstacleXY[] obstacles { get; set; }
 
@@ -18,11 +19,11 @@ public class ArenaStatus
         this.obstacles = obstacles;
         ActiveSnakes = new List<Snake>();
         DisabledSnakes = new List<string>();
+        SnakesToRevive = new List<Snake>();
     }
     public void AddActiveSnake(Snake s) => ActiveSnakes.Add(s);
-
     public void AddDisabledSnake(string player) => DisabledSnakes.Add(player);
-
+    public void AddSnakeToRevive(Snake s) => SnakesToRevive.Add(s);
     public static Players Deserialize(string json) => JsonConvert.DeserializeObject<Players>(json);
     public static string Serialize(Players m) => JsonConvert.SerializeObject(m);
 }

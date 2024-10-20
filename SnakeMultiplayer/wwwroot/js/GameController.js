@@ -81,7 +81,10 @@ class GameController {
             case "Update":
                 // Update game state
                 this.HandleUpdate(message.body.status);
-                break;
+                break; 
+            case "Revive":
+                console.log("REVIVE MESSAGE RECEIVED");
+                this.handleRevive(message.body.playerName);
             case "Settings":
                 this.mainDispatcher.dispatch("onSettingsReceived", message.body.settings);
                 break;
@@ -137,6 +140,11 @@ class GameController {
         this.drawSnakes();
     }
 
+    handleRevive(playerName) {
+        // Call the server-side method to revive the snake
+        this.drawSnake(playerName);
+    }
+
     HandleUpdate(updateMessage) {
         var food = updateMessage.food;
         if (food !== null) {
@@ -168,6 +176,25 @@ class GameController {
                 this.cellContainer.clearCoords(this.snakes[player].getBodyArray());
                 this.snakes[player] = null;
             }
+        }
+
+        console.log("Snakes to revive: ", updateMessage.snakesToRevive);
+
+        // Paint snakes to revive
+        var snakesToRevive = updateMessage.snakesToRevive;
+        for (i = 0; i < snakesToRevive.length; i++) {
+            console.log(`Reviving snake: ${snakesToRevive[i]}`);
+            var player = snakesToRevive[i];            
+            var head = snakesToRevive[i].head;
+            var tail = snakesToRevive[i].tail;
+            var player = snakesToRevive[i].player;
+            var color = snakesToRevive[i].color;
+            var striped = snakesToRevive[i].isStriped;
+
+            var snake = new Snake(player, color, striped);
+            snake.setStartPoint(head.x, head.y);
+            this.snakes[player] = snake;
+            this.drawSnake(player);
         }
     }
 
@@ -223,6 +250,17 @@ class GameController {
             if (snake != null) {
                 this.cellContainer.initializeSnake(this.snakes[key].getBodyArray(), this.snakes[key].color);
             }
+        }
+    }
+
+    
+    drawSnake(key) {
+        // Draw an existing snake (used for reviving a snake)
+        console.log(`Drawing snakeEEEEEEEEEEEEEEEEEEEEEE: ${key}`);
+        var snake = this.snakes[key];
+        if (snake != null) {
+            console.log(`SNAKE IS NOT NULL YEYYYYYYYYYYYYYYYYYYYYYYYYYYY: ${key}`);
+            this.cellContainer.initializeSnake(this.snakes[key].getBodyArray(), this.snakes[key].color);
         }
     }
 }

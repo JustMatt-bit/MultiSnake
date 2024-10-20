@@ -139,12 +139,12 @@ public class LobbyService : ILobbyService
         {
             return activePlayers.Count() <= 1;
         }
-        else if (playerCount == 1)
+        else if (playerCount == 0)
         {
-            return !activePlayers.Any();
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     public int GetPlayerCount() => players.Count;
