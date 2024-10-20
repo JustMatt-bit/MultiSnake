@@ -42,6 +42,7 @@ public class LobbyService : ILobbyService
     readonly ConcurrentDictionary<string, Snake> players = new();
 
     private List<IObserver> observers = new List<IObserver>();
+    private IArenaFactory factory;
 
     readonly Arena Arena;
     readonly int MaxPlayers;
@@ -53,8 +54,9 @@ public class LobbyService : ILobbyService
         HostPlayer = host;
         State = LobbyStates.Idle;
         MaxPlayers = maxPlayers;
-        IArenaFactory factory = ArenaFactoryProvider.GetFactory(level);
+        factory = ArenaFactoryProvider.GetFactory(level);
         Arena = factory.CreateArena(players);
+        factory.CreateObstaclesInArena(Arena);
     }
      public void RegisterObserver(IObserver observer)
     {

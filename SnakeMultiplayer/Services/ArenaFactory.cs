@@ -1,22 +1,35 @@
 // File: SnakeMultiplayer/Services/IArenaFactory.cs
+using System;
 using System.Collections.Concurrent;
 
+using JsonLibrary.FromClient;
 using JsonLibrary.FromServer;
+
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace SnakeMultiplayer.Services
 {
     public interface IArenaFactory
     {
         Arena CreateArena(ConcurrentDictionary<string, Snake> players);
+        void CreateObstaclesInArena(Arena arena);
     }
 
     public class Level1ArenaFactory : IArenaFactory
     {
         public Arena CreateArena(ConcurrentDictionary<string, Snake> players)
         {
-            int obstacleCount = 2;
             Speed speed = Speed.Slow;
-            return new Arena(players, obstacleCount, speed);
+            var arena = new Arena(players, speed);
+            arena.CreateBoard(20, 20);
+            return arena;
+        }
+
+        public void CreateObstaclesInArena(Arena arena)
+        {
+            Random random = new Random();
+            var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+            arena.AddObstacle(newObstacle);
         }
     }
 
@@ -24,9 +37,19 @@ namespace SnakeMultiplayer.Services
     {
         public Arena CreateArena(ConcurrentDictionary<string, Snake> players)
         {
-            int obstacleCount = 5;
             Speed speed = Speed.Normal;
-            return new Arena(players, obstacleCount, speed);
+            var arena = new Arena(players, speed);
+            arena.CreateBoard(20, 20);
+            return arena;
+        }
+
+        public void CreateObstaclesInArena(Arena arena)
+        {
+            Random random = new Random();
+            var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+            arena.AddObstacle(newObstacle);
+            newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+            arena.AddObstacle(newObstacle);
         }
     }
 
@@ -34,9 +57,21 @@ namespace SnakeMultiplayer.Services
     {
         public Arena CreateArena(ConcurrentDictionary<string, Snake> players)
         {
-            int obstacleCount = 10;
             Speed speed = Speed.Fast;
-            return new Arena(players, obstacleCount, speed);
+            var arena =  new Arena(players, speed);
+            arena.CreateBoard(20, 20);
+            return arena;
+        }
+
+        public void CreateObstaclesInArena(Arena arena)
+        {
+            Random random = new Random();
+            var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+            arena.AddObstacle(newObstacle);
+            newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+            arena.AddObstacle(newObstacle);
+            newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+            arena.AddObstacle(newObstacle);
         }
     }
 }
