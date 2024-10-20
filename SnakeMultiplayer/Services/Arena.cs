@@ -21,20 +21,26 @@ public class Arena
     ConcurrentDictionary<string, int> Scores;
     ConcurrentDictionary<string, MoveDirection> PreviousActions;
     Cells[,] Board;
-    int Width;
-    int Height;
+    public int Width;
+    public int Height;
     bool IsWall;
     Coordinate Food;
-    Obstacle[] Obstacles;
+    LinkedList<Obstacle> Obstacles;
 
-    public Arena(ConcurrentDictionary<string, Snake> players, int obstacleCount, Speed speed)
+    public Arena(ConcurrentDictionary<string, Snake> players, Speed speed)
     {
         Snakes = players;
         PendingActions = new ConcurrentDictionary<string, MoveDirection>();
         Scores = new ConcurrentDictionary<string, int>();
         Food = null;
-        Obstacles = new Obstacle[obstacleCount];
+        Obstacles = new LinkedList<Obstacle>();
         Speed = speed;
+    }
+
+    public void CreateBoard(int width, int height) {
+        Width = width;
+        Height = height;
+        Board = new Cells[Width, Height];
     }
 
     public ArenaStatus GenerateReport()
@@ -62,7 +68,8 @@ public class Arena
                 var tail = snake.Value.Tail?.ConvertToXY();
                 var color = snake.Value.GetColorString();
                 var score = GetScore(snake.Key);
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score);
+                var isStriped = snake.Value.IsStriped;
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score, isStriped);
                 report.AddActiveSnake(tempSnake);
             }
         }
@@ -104,28 +111,45 @@ public class Arena
         throw new Exception("Could not set food");
     }
 
-    public void GenerateObstacles()
-    {
-        for (int i = 0; i < Obstacles.Count(); i++)
+    // public void GenerateObstacles()
+    // {
+    //     for (int i = 0; i < Obstacles.Count(); i++)
+    //     {
+    //         bool isObstacleSet = false;
+
+    //         while (!isObstacleSet)
+    //         {
+    //             var newObstacle = new Coordinate(Random.Next(0, Width), Random.Next(0, Height));
+
+    //             // Ensure the obstacle isn't on a snake or food
+    //             var containsSnake = Snakes.Values.Any(snake => snake.Contains(newObstacle));
+    //             var isFoodCell = Board[newObstacle.X, newObstacle.Y] == Cells.food;
+
+    //             if (!containsSnake && !isFoodCell)
+    //             {
+    //                 Obstacles[i] = new Obstacle(newObstacle); // Set obstacle in the array
+    //                 Board[newObstacle.X, newObstacle.Y] = Cells.obstacle; // Mark the board cell as an obstacle
+    //                 isObstacleSet = true;
+    //             }
+    //         }
+    //     }
+    // }
+
+    public void AddObstacle(Coordinate obstaclePosition) {
+        if (obstaclePosition == null)
         {
-            bool isObstacleSet = false;
-
-            while (!isObstacleSet)
-            {
-                var newObstacle = new Coordinate(Random.Next(0, Width), Random.Next(0, Height));
-
-                // Ensure the obstacle isn't on a snake or food
-                var containsSnake = Snakes.Values.Any(snake => snake.Contains(newObstacle));
-                var isFoodCell = Board[newObstacle.X, newObstacle.Y] == Cells.food;
-
-                if (!containsSnake && !isFoodCell)
-                {
-                    Obstacles[i] = new Obstacle(newObstacle); // Set obstacle in the array
-                    Board[newObstacle.X, newObstacle.Y] = Cells.obstacle; // Mark the board cell as an obstacle
-                    isObstacleSet = true;
-                }
-            }
+            throw new ArgumentNullException(nameof(obstaclePosition));
         }
+
+        // Ensure the obstacle position is within the bounds of the arena
+        if (obstaclePosition.X < 0 || obstaclePosition.X >= Width || obstaclePosition.Y < 0 || obstaclePosition.Y >= Height)
+        {
+            throw new ArgumentOutOfRangeException(nameof(obstaclePosition), "Obstacle position is out of bounds.");
+        }
+
+        // Set the obstacle position and update the board
+        Obstacles.AddLast(new Obstacle(obstaclePosition));
+        Board[obstaclePosition.X, obstaclePosition.Y] = Cells.obstacle;
     }
 
 
@@ -140,8 +164,8 @@ public class Arena
         // Consider Speed Setting
         if (settings.cellCount != 0)
         {
-            Width = settings.cellCount;
-            Height = settings.cellCount;
+            //Width = settings.cellCount;
+            //Height = settings.cellCount;
         }
         if (settings.isWall != null)
         {
@@ -185,15 +209,14 @@ public class Arena
 
     public string PrepareForNewGame()
     {
-        Board = new Cells[Width, Height];
         Scores = new ConcurrentDictionary<string, int>();
         if (!SetInitialPositionsAndActions())
         {
             return "Could not set initial positions";
         }
 
-        GenerateFood(true);
-        GenerateObstacles();
+        //GenerateFood(true);
+        //GenerateObstacles();
 
         return string.Empty;
     }

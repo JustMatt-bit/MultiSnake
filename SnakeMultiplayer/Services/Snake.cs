@@ -8,13 +8,18 @@ public class Snake
 {
     private LinkedList<Coordinate> body;
     public readonly PlayerColor color;
+    public bool IsStriped { get; private set; }
+
     public bool IsActive { get; private set; }
     public Coordinate Tail { get; private set; }
+    public object Player { get; internal set; }
 
-    public Snake(PlayerColor color)
+
+    public Snake(PlayerColor color, bool stripes)
     {
         this.color = color;
         body = new LinkedList<Coordinate>();
+        IsStriped  = stripes;
     }
 
     public void SetInitialPosition(Coordinate coordinate)
