@@ -82,9 +82,6 @@ class GameController {
                 // Update game state
                 this.HandleUpdate(message.body.status);
                 break; 
-            case "Revive":
-                console.log("REVIVE MESSAGE RECEIVED");
-                this.handleRevive(message.body.playerName);
             case "Settings":
                 this.mainDispatcher.dispatch("onSettingsReceived", message.body.settings);
                 break;
@@ -140,10 +137,6 @@ class GameController {
         this.drawSnakes();
     }
 
-    handleRevive(playerName) {
-        // Call the server-side method to revive the snake
-        this.drawSnake(playerName);
-    }
 
     HandleUpdate(updateMessage) {
         var food = updateMessage.food;

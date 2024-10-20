@@ -21,8 +21,6 @@ public interface IServerHub
     Task InitiateGameStart(string lobby, ArenaStatus report);
     Task SendSettingsUpdate(string lobby, Settings settings);
     Task SendPlayerStatusUpdate(string lobby, List<Player> players, string removedlayerName = null);
-    Task SendReviveMessage(string lobby, string playerName);
-
 }
 
 static class ClientMethod
@@ -33,9 +31,7 @@ static class ClientMethod
     public const string OnGameEnd = "OnGameEnd";
     public const string OnLobbyMessage = "OnLobbyMessage";
     public const string OnGameStart = "OnGameStart";
-    public const string OnArenaStatusUpdate = "OnArenaStatusUpdate";
-    public const string OnRevive = "OnRevive";
-}
+    public const string OnArenaStatusUpdate = "OnArenaStatusUpdate";}
 
 public class ServerHub : IServerHub
 {
@@ -63,13 +59,6 @@ public class ServerHub : IServerHub
         var message = new Message("server", lobby, "Update", new { status });
         Console.WriteLine($"Sending: {Message.Serialize(message)}");
         return HubContext.Clients.Group(lobby).SendAsync(ClientMethod.OnArenaStatusUpdate, message);
-    }
-
-    public Task SendReviveMessage(string lobby, string playerName)
-    {
-        var message = new Message("server", lobby, "Revive", new{ playerName });
-        Console.WriteLine($"Sending: {Message.Serialize(message)}");
-        return HubContext.Clients.Group(lobby).SendAsync(ClientMethod.OnRevive, message);
     }
 
     public Task SendSettingsUpdate(string lobby, Settings settings)
