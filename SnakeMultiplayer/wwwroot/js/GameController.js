@@ -81,7 +81,7 @@ class GameController {
             case "Update":
                 // Update game state
                 this.HandleUpdate(message.body.status);
-                break; 
+                break;
             case "Settings":
                 this.mainDispatcher.dispatch("onSettingsReceived", message.body.settings);
                 break;
@@ -167,13 +167,10 @@ class GameController {
             console.log(`Disabling snake: ${player}`);
             if (this.snakes[player] != null) {
                 this.cellContainer.clearCoords(this.snakes[player].getBodyArray());
-                
                 this.snakes[player] = null;
                 
             }
         }
-
-        console.log("Snakes to revive: ", updateMessage.snakesToRevive);
 
         // Paint snakes to revive
         var snakesToRevive = updateMessage.snakesToRevive;
@@ -183,12 +180,18 @@ class GameController {
             var head = snakesToRevive[i].head;
             var tail = snakesToRevive[i].tail;
             var player = snakesToRevive[i].player;
+            var bodyArray = snakesToRevive[i].body;
             var color = snakesToRevive[i].color;
             var striped = snakesToRevive[i].isStriped;
 
             var snake = new Snake(player, color, striped);
             snake.setStartPoint(head.x, head.y);
+            for (var j = 0; j < bodyArray.length; j++) {
+                snake.body.addFirst(bodyArray[j]);
+            }
             this.snakes[player] = snake;
+            this.snakes[player].updateCoord(head, tail);
+            this.cellContainer.updateSnake(color, head, tail, striped);
             this.drawSnake(player);
         }
     }
@@ -251,10 +254,9 @@ class GameController {
     
     drawSnake(key) {
         // Draw an existing snake (used for reviving a snake)
-        console.log(`Drawing snakeEEEEEEEEEEEEEEEEEEEEEE: ${key}`);
         var snake = this.snakes[key];
         if (snake != null) {
-            console.log(`SNAKE IS NOT NULL YEYYYYYYYYYYYYYYYYYYYYYYYYYYY: ${key}`);
+            console.log(`Snake body: ${JSON.stringify(snake.getBodyArray())}`);
             this.cellContainer.initializeSnake(this.snakes[key].getBodyArray(), this.snakes[key].color);
         }
     }

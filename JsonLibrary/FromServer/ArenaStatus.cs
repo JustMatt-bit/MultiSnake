@@ -37,13 +37,15 @@ public class Snake
     public XY head { get; set; }
     public XY tail { get; set; }
     public bool isStriped { get; set; }
+    public List<XY> body { get; set; }
 
-    public Snake(string player, string color, XY head, XY tail, int score = 0, bool stripes = false)
+    public Snake(string player, string color, XY head, XY tail, List<XY> body, int score = 0, bool stripes = false)
     {
         this.player = player;
         this.color = color;
         this.head = head;
         this.tail = tail;
+        this.body = body;
         this.score = score;
         this.isStriped = stripes;
     }

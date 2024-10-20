@@ -27,7 +27,7 @@ public class Snake : IPrototype<Snake>
     public Snake Clone() 
     {
         var clonedSnake = (Snake)this.MemberwiseClone();
-        clonedSnake.body = new LinkedList<Coordinate>(this.body);
+        clonedSnake.body = new LinkedList<Coordinate>(this.body.Select(coord => coord.Clone()));
         return clonedSnake;
     }
 
@@ -41,6 +41,10 @@ public class Snake : IPrototype<Snake>
     public void Deactivate()
     {
         IsActive = false;
+    }
+
+    public void SetBodyToNull(){
+        body = null;
     }
 
     public void Activate()
@@ -130,4 +134,13 @@ public class Snake : IPrototype<Snake>
     }
 
     public string GetColorString() => Enum.GetName(typeof(PlayerColor), color);
+
+    public Coordinate[] GetBodyArray(){
+        return body.ToArray();
+    }
+
+    public List<Coordinate> GetBodyAsCoordinateList()
+    {
+        return body.Select(coord => coord.Clone()).ToList();
+    }
 }

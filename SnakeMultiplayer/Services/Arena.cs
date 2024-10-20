@@ -71,7 +71,8 @@ public class Arena
                 var color = snake.Value.GetColorString();
                 var score = GetScore(snake.Key);
                 var isStriped = snake.Value.IsStriped;
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score, isStriped);
+                var body = snake.Value.GetBodyAsCoordinateList().Select(coord => coord.ConvertToXY()).ToList(); // Convert to List<XY>
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, body, score, isStriped);
                 report.AddSnakeToRevive(tempSnake);
                 snake.Value.IsRevived = false;
             }
@@ -82,7 +83,7 @@ public class Arena
                 var color = snake.Value.GetColorString();
                 var score = GetScore(snake.Key);
                 var isStriped = snake.Value.IsStriped;
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score, isStriped);
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, null, score, isStriped);
                 report.AddActiveSnake(tempSnake);
             }
         }
@@ -93,11 +94,11 @@ public class Arena
     {
         if (clonedSnakes.TryGetValue(playerName, out var clonedSnake))
         {
-            await Task.Delay(5000);
+            await Task.Delay(3000);
             Snakes[playerName] = clonedSnake;
-            Snakes[playerName].IsRevived = true;
-            Snakes[playerName].Activate();
             clonedSnakes.Remove(playerName);
+            Snakes[playerName].Activate();
+            Snakes[playerName].IsRevived = true;
         }
     }
 
@@ -317,7 +318,9 @@ public class Arena
                 // Clone the snake using the PROTOTYPE pattern to revive it later
                 snake.Value.Deactivate(); 
                 clonedSnakes[snake.Key] = snake.Value.Clone();
+                snake.Value.SetBodyToNull();
                 ReviveSnake(snake.Key);
+
                 continue;
             }
 

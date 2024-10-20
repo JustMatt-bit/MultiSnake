@@ -135,14 +135,15 @@ public class LobbyService : ILobbyService
         var activePlayers = players.Values.Where(player => player.IsActive);
         var playerCount = players.Count;
 
-        if (1 < playerCount)
-        {
-            return activePlayers.Count() <= 1;
-        }
-        else if (playerCount == 0)
-        {
-            return true;
-        }
+        // Commented out because now the game ends when player reaches certain amount of points, and if an obstacle is hit, they respawn
+        // if (1 < playerCount)
+        // {
+        //     return activePlayers.Count() <= 1;
+        // }
+        // else if (playerCount == 0)
+        // {
+        //     return true;
+        // }
 
         return false;
     }

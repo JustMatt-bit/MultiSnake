@@ -31,7 +31,8 @@ static class ClientMethod
     public const string OnGameEnd = "OnGameEnd";
     public const string OnLobbyMessage = "OnLobbyMessage";
     public const string OnGameStart = "OnGameStart";
-    public const string OnArenaStatusUpdate = "OnArenaStatusUpdate";}
+    public const string OnArenaStatusUpdate = "OnArenaStatusUpdate";
+}
 
 public class ServerHub : IServerHub
 {
