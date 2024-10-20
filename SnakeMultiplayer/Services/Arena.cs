@@ -335,7 +335,7 @@ public class Arena
             else if (Board[newHead.X, newHead.Y].Equals(Cells.strategyChange))
             {
                 StrategyCell = null;
-                var randomChoice = 3; // random.Next(_strategiesCount);
+                var randomChoice = random.Next(_strategiesCount);
                 IMovementStrategy newMovementStrategy = randomChoice switch
                 {
                     0 => new InverseMovementStrategy(),
