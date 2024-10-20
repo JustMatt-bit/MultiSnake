@@ -11,14 +11,20 @@ public class Snake
     private LinkedList<Coordinate> body;
     public IMovementStrategy MovementStrategy { get; private set; }
     public readonly PlayerColor color;
+    public bool IsStriped { get; private set; }
+
     public bool IsActive { get; private set; }
     public Coordinate Tail { get; private set; }
+    public object Player { get; internal set; }
 
-    public Snake(PlayerColor color, IMovementStrategy strategy)
+
+    public Snake(PlayerColor color, bool stripes, IMovementStrategy strategy)
     {
         this.color = color;
         body = new LinkedList<Coordinate>();
+        IsStriped = stripes;
         MovementStrategy = strategy;
+        IsStriped  = stripes;
     }
 
     public void SetInitialPosition(Coordinate coordinate)

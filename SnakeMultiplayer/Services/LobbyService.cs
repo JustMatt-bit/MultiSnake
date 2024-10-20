@@ -11,7 +11,7 @@ using SnakeMultiplayer.Services.Strategies.Movement;
 
 namespace SnakeMultiplayer.Services;
 
-public interface ILobbyService
+public interface ILobbyService : ISubject
 {
     LobbyStates State { get; }
     Speed Speed { get; }
@@ -43,6 +43,9 @@ public class LobbyService : ILobbyService
 
     readonly ConcurrentDictionary<string, Snake> players = new();
 
+    private List<IObserver> observers = new List<IObserver>();
+    private IArenaFactory factory;
+
     readonly Arena Arena;
     readonly int MaxPlayers;
     readonly string HostPlayer;
@@ -53,8 +56,30 @@ public class LobbyService : ILobbyService
         HostPlayer = host;
         State = LobbyStates.Idle;
         MaxPlayers = maxPlayers;
-        IArenaFactory factory = ArenaFactoryProvider.GetFactory(level);
+        factory = ArenaFactoryProvider.GetFactory(level);
         Arena = factory.CreateArena(players);
+        factory.CreateObstacles(Arena);
+    }
+     public void RegisterObserver(IObserver observer)
+    {
+        if (!observers.Contains(observer))
+        {
+            observers.Add(observer);
+        }
+    }
+
+    public void RemoveObserver(IObserver observer)
+    {
+        observers.Remove(observer);
+    }
+
+    public void NotifyObservers(string operation, string record)
+    {
+        var currentObservers = new List<IObserver>(observers);
+        foreach (var observer in currentObservers)
+        {
+            observer.Update(operation, this);
+        }
     }
 
     public string AddPlayer(string playerName)
@@ -65,7 +90,9 @@ public class LobbyService : ILobbyService
             return reason;
         }
 
-        if (!players.TryAdd(playerName, new Snake(GetValidPlayerColor(), new DefaultMovementStrategy())))
+        var snake = factory.CreateSnake(players, playerName, new DefaultMovementStrategy());
+         
+        if (!players.TryAdd(playerName, snake))
         {
             return "An error has occured. Please try again later.";
         }
@@ -94,10 +121,13 @@ public class LobbyService : ILobbyService
     public ArenaStatus UpdateLobbyState()
     {
         Arena.UpdateActions();
-
+        if(Arena.GetScores().Any(score => score.Value >= 10)){
+            Arena.GenerateReport();
+            NotifyObservers("end", "end");
+        }
         if (!IsGameEnd())
             return Arena.GenerateReport();
-
+        
         State = LobbyStates.Idle;
         return null;
     }
@@ -186,22 +216,6 @@ public class LobbyService : ILobbyService
     //TODO: Implement 
     public bool IsActive() => true;
 
-    private PlayerColor GetValidPlayerColor()
-    {
-        var players = this.players.Values.ToList();
-        var takenColors = players.Select(p => p.color).ToList();
-        var allColors = Enum.GetValues(typeof(PlayerColor)).Cast<PlayerColor>().ToList();
-
-        foreach (var color in allColors)
-        {
-            if (!takenColors.Contains(color))
-            {
-                return color;
-            }
-        }
-
-        throw new InvalidOperationException("Cannot find unused player color, because all are used.");
-    }
     public void RecordPlayerScores(IScoringService scoringService) {
         Dictionary<string, int> scores = Arena.GetScores();
         foreach (var score in scores)
