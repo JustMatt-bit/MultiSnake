@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using JsonLibrary.FromClient;
 using JsonLibrary.FromServer;
@@ -16,6 +17,8 @@ public class Arena
 
     readonly Random Random = new(Guid.NewGuid().GetHashCode());
     readonly ConcurrentDictionary<string, Snake> Snakes;
+    private Dictionary<string, Snake> clonedSnakes = new Dictionary<string, Snake>();
+
     readonly ConcurrentDictionary<string, MoveDirection> PendingActions;
 
     ConcurrentDictionary<string, int> Scores;
@@ -62,6 +65,17 @@ public class Arena
             {
                 report.AddDisabledSnake(snake.Key);
             }
+            else if (snake.Value.IsRevived) {
+                var head = snake.Value.CloneHead().ConvertToXY();
+                var tail = snake.Value.Tail?.ConvertToXY();
+                var color = snake.Value.GetColorString();
+                var score = GetScore(snake.Key);
+                var isStriped = snake.Value.IsStriped;
+                var body = snake.Value.GetBodyAsCoordinateList().Select(coord => coord.ConvertToXY()).ToList(); // Convert to List<XY>
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, body, score, isStriped);
+                report.AddSnakeToRevive(tempSnake);
+                snake.Value.IsRevived = false;
+            }
             else
             {
                 var head = snake.Value.CloneHead().ConvertToXY();
@@ -69,12 +83,25 @@ public class Arena
                 var color = snake.Value.GetColorString();
                 var score = GetScore(snake.Key);
                 var isStriped = snake.Value.IsStriped;
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score, isStriped);
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, null, score, isStriped);
                 report.AddActiveSnake(tempSnake);
             }
         }
         return report;
     }
+
+    public async void ReviveSnake(string playerName)
+    {
+        if (clonedSnakes.TryGetValue(playerName, out var clonedSnake))
+        {
+            await Task.Delay(3000);
+            Snakes[playerName] = clonedSnake;
+            clonedSnakes.Remove(playerName);
+            Snakes[playerName].Activate();
+            Snakes[playerName].IsRevived = true;
+        }
+    }
+
 
     // Inefficient. 
     // TODO: get random coordinates and use breath-first search algorithm 
@@ -288,7 +315,12 @@ public class Arena
             }
             else
             {
-                snake.Value.Deactivate();
+                // Clone the snake using the PROTOTYPE pattern to revive it later
+                snake.Value.Deactivate(); 
+                clonedSnakes[snake.Key] = snake.Value.Clone();
+                snake.Value.SetBodyToNull();
+                ReviveSnake(snake.Key);
+
                 continue;
             }
 
