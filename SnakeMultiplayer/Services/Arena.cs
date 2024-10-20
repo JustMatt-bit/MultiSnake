@@ -68,7 +68,8 @@ public class Arena
                 var tail = snake.Value.Tail?.ConvertToXY();
                 var color = snake.Value.GetColorString();
                 var score = GetScore(snake.Key);
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score);
+                var isStriped = snake.Value.IsStriped;
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, head, tail, score, isStriped);
                 report.AddActiveSnake(tempSnake);
             }
         }

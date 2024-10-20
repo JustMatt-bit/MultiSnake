@@ -1,8 +1,9 @@
 ﻿class Snake {
-    constructor(name, color, x, y) {
+    constructor(name, color, stripes) {
         this.body = new CustomLinkedList();
         this.name = name;
         this.color = color;
+        this.isStriped = stripes;
     }
 
     setStartPoint(x, y) {
@@ -125,9 +126,10 @@ class GameController {
             var tail = snakesArray[i].tail;
             var player = snakesArray[i].player;
             var color = snakesArray[i].color;
+            var striped = snakesArray[i].isStriped;
 
             //this.cellContainer.updateSnake(color, head, tail);
-            var snake = new Snake(player, color);
+            var snake = new Snake(player, color, striped);
             snake.setStartPoint(head.x, head.y);
             //this.snakes.push(snake);
             this.snakes[player] = snake;
@@ -149,10 +151,11 @@ class GameController {
             var player = snakesArray[i].player;
             var color = snakesArray[i].color;
             var score = snakesArray[i].score;
+            var striped = snakesArray[i].isStriped;
             console.log(`Updating score for ${player}: ${score}`);
 
             this.snakes[player].updateCoord(head, tail);
-            this.cellContainer.updateSnake(color, head, tail);
+            this.cellContainer.updateSnake(color, head, tail, striped);
             updatePlayerScore(player, score); // Update the player's score
         }
 
@@ -215,7 +218,6 @@ class GameController {
     }
 
     drawSnakes() {
-
         for (var key in this.snakes) {
             var snake = this.snakes[key];
             if (snake != null) {

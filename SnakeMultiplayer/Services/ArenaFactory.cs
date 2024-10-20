@@ -1,6 +1,8 @@
 // File: SnakeMultiplayer/Services/IArenaFactory.cs
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 using JsonLibrary.FromClient;
 using JsonLibrary.FromServer;
@@ -12,7 +14,8 @@ namespace SnakeMultiplayer.Services
     public interface IArenaFactory
     {
         Arena CreateArena(ConcurrentDictionary<string, Snake> players);
-        void CreateObstaclesInArena(Arena arena);
+        void CreateObstacles(Arena arena);
+        Snake CreateSnake(ConcurrentDictionary<string, Snake> currentSnakes, string playerName);
     }
 
     public class Level1ArenaFactory : IArenaFactory
@@ -25,11 +28,39 @@ namespace SnakeMultiplayer.Services
             return arena;
         }
 
-        public void CreateObstaclesInArena(Arena arena)
+        public void CreateObstacles(Arena arena)
         {
             Random random = new Random();
-            var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
-            arena.AddObstacle(newObstacle);
+            for (int i = 0; i < 1; i++)
+            {
+                var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+                arena.AddObstacle(newObstacle);
+            }
+        }
+
+        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName)
+        {
+            var color = GetValidPlayerColor(players);
+            var snake = new Snake(color, false);
+
+            return snake;
+        }
+
+        private PlayerColor GetValidPlayerColor(ConcurrentDictionary<string, Snake> p)
+        {
+            var players = p.Values.ToList();
+            var takenColors = players.Select(p => p.color).ToList();
+            var allColors = Enum.GetValues(typeof(PlayerColor)).Cast<PlayerColor>().ToList();
+
+            foreach (var color in allColors)
+            {
+                if (!takenColors.Contains(color))
+                {
+                    return color;
+                }
+            }
+
+            throw new InvalidOperationException("Cannot find unused player color, because all are used.");
         }
     }
 
@@ -43,13 +74,39 @@ namespace SnakeMultiplayer.Services
             return arena;
         }
 
-        public void CreateObstaclesInArena(Arena arena)
+        public void CreateObstacles(Arena arena)
         {
             Random random = new Random();
-            var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
-            arena.AddObstacle(newObstacle);
-            newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
-            arena.AddObstacle(newObstacle);
+            for (int i = 0; i < 5; i++)
+            {
+                var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+                arena.AddObstacle(newObstacle);
+            }        
+        }
+        
+        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName)
+        {
+            var color = GetValidPlayerColor(players);
+            var snake = new Snake(color, false);
+
+            return snake;
+        }
+
+        private PlayerColor GetValidPlayerColor(ConcurrentDictionary<string, Snake> p)
+        {
+            var players = p.Values.ToList();
+            var takenColors = players.Select(p => p.color).ToList();
+            var allColors = Enum.GetValues(typeof(PlayerColor)).Cast<PlayerColor>().ToList();
+
+            foreach (var color in allColors)
+            {
+                if (!takenColors.Contains(color))
+                {
+                    return color;
+                }
+            }
+
+            throw new InvalidOperationException("Cannot find unused player color, because all are used.");
         }
     }
 
@@ -63,15 +120,39 @@ namespace SnakeMultiplayer.Services
             return arena;
         }
 
-        public void CreateObstaclesInArena(Arena arena)
+        public void CreateObstacles(Arena arena)
         {
             Random random = new Random();
-            var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
-            arena.AddObstacle(newObstacle);
-            newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
-            arena.AddObstacle(newObstacle);
-            newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
-            arena.AddObstacle(newObstacle);
+            for (int i = 0; i < 10; i++)
+            {
+                var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+                arena.AddObstacle(newObstacle);
+            }
+        }
+
+        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName)
+        {
+            var color = GetValidPlayerColor(players);
+            var snake = new Snake(color, true);
+
+            return snake;
+        }
+
+        private PlayerColor GetValidPlayerColor(ConcurrentDictionary<string, Snake> p)
+        {
+            var players = p.Values.ToList();
+            var takenColors = players.Select(p => p.color).ToList();
+            var allColors = Enum.GetValues(typeof(PlayerColor)).Cast<PlayerColor>().ToList();
+
+            foreach (var color in allColors)
+            {
+                if (!takenColors.Contains(color))
+                {
+                    return color;
+                }
+            }
+
+            throw new InvalidOperationException("Cannot find unused player color, because all are used.");
         }
     }
 }

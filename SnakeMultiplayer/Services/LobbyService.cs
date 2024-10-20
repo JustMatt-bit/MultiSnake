@@ -56,7 +56,7 @@ public class LobbyService : ILobbyService
         MaxPlayers = maxPlayers;
         factory = ArenaFactoryProvider.GetFactory(level);
         Arena = factory.CreateArena(players);
-        factory.CreateObstaclesInArena(Arena);
+        factory.CreateObstacles(Arena);
     }
      public void RegisterObserver(IObserver observer)
     {
@@ -88,7 +88,9 @@ public class LobbyService : ILobbyService
             return reason;
         }
 
-        if (!players.TryAdd(playerName, new Snake(GetValidPlayerColor())))
+        var snake = factory.CreateSnake(players, playerName);
+
+        if (!players.TryAdd(playerName, snake))
         {
             return "An error has occured. Please try again later.";
         }
@@ -212,22 +214,6 @@ public class LobbyService : ILobbyService
     //TODO: Implement 
     public bool IsActive() => true;
 
-    private PlayerColor GetValidPlayerColor()
-    {
-        var players = this.players.Values.ToList();
-        var takenColors = players.Select(p => p.color).ToList();
-        var allColors = Enum.GetValues(typeof(PlayerColor)).Cast<PlayerColor>().ToList();
-
-        foreach (var color in allColors)
-        {
-            if (!takenColors.Contains(color))
-            {
-                return color;
-            }
-        }
-
-        throw new InvalidOperationException("Cannot find unused player color, because all are used.");
-    }
     public void RecordPlayerScores(IScoringService scoringService) {
         Dictionary<string, int> scores = Arena.GetScores();
         foreach (var score in scores)
