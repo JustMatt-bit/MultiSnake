@@ -9,13 +9,15 @@ using JsonLibrary.FromServer;
 
 using Microsoft.AspNetCore.HttpOverrides;
 
+using SnakeMultiplayer.Services.Strategies.Movement;
+
 namespace SnakeMultiplayer.Services
 {
     public interface IArenaFactory
     {
         Arena CreateArena(ConcurrentDictionary<string, Snake> players);
         void CreateObstacles(Arena arena);
-        Snake CreateSnake(ConcurrentDictionary<string, Snake> currentSnakes, string playerName);
+        Snake CreateSnake(ConcurrentDictionary<string, Snake> currentSnakes, string playerName, IMovementStrategy movementStrategy);
     }
 
     public class Level1ArenaFactory : IArenaFactory
@@ -38,10 +40,10 @@ namespace SnakeMultiplayer.Services
             }
         }
 
-        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName)
+        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)
         {
             var color = GetValidPlayerColor(players);
-            var snake = new Snake(color, false);
+            var snake = new Snake(color, false, movementStrategy);
 
             return snake;
         }
@@ -84,10 +86,10 @@ namespace SnakeMultiplayer.Services
             }        
         }
         
-        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName)
+        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)
         {
             var color = GetValidPlayerColor(players);
-            var snake = new Snake(color, false);
+            var snake = new Snake(color, false, movementStrategy);
 
             return snake;
         }
@@ -130,10 +132,10 @@ namespace SnakeMultiplayer.Services
             }
         }
 
-        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName)
+        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)
         {
             var color = GetValidPlayerColor(players);
-            var snake = new Snake(color, true);
+            var snake = new Snake(color, true, movementStrategy);
 
             return snake;
         }

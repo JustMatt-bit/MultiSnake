@@ -80,7 +80,7 @@ class GameController {
                 break;
             case "Update":
                 // Update game state
-                this.HandleUpdate(message.body.status);
+                this.HandleUpdate(message.body.status, this.playerName);
                 break;
             case "Settings":
                 this.mainDispatcher.dispatch("onSettingsReceived", message.body.settings);
@@ -119,6 +119,11 @@ class GameController {
             }
         }
 
+        const strategyCell = startMessage.strategyCell;
+        if (strategyCell) {
+            this.cellContainer.drawCell(strategyCell.position.x, strategyCell.position.y, strategyCell.color)
+        }
+
         var snakesArray = startMessage.activeSnakes;
         var i;
         for (i = 0; i < snakesArray.length; i++) {
@@ -137,12 +142,17 @@ class GameController {
         this.drawSnakes();
     }
 
-
-    HandleUpdate(updateMessage) {
+    HandleUpdate(updateMessage, playerName) {
         var food = updateMessage.food;
         if (food !== null) {
             this.cellContainer.drawCell(food.x, food.y, "black");
         }
+
+        const strategyCell = updateMessage.strategyCell;
+        if (strategyCell) {
+            this.cellContainer.drawCell(strategyCell.position.x, strategyCell.position.y, strategyCell.color)
+        }
+
         // Update active snakes
         var snakesArray = updateMessage.activeSnakes;
         var i;
@@ -153,11 +163,16 @@ class GameController {
             var color = snakesArray[i].color;
             var score = snakesArray[i].score;
             var striped = snakesArray[i].isStriped;
+            var movementStrategy = snakesArray[i].movementStrategy;
             console.log(`Updating score for ${player}: ${score}`);
+            console.log(`Movement strat: ${movementStrategy}`)
+            console.log(`Logged in player: ${playerName}`)
+
 
             this.snakes[player].updateCoord(head, tail);
             this.cellContainer.updateSnake(color, head, tail, striped);
             updatePlayerScore(player, score); // Update the player's score
+            displayMovementStrategy(playerName, player, movementStrategy);
         }
 
         // Unpaint inactive snakes
@@ -283,5 +298,19 @@ function updatePlayerScore(player, score) {
         newScoreElement.id = `score-${player}`;
         newScoreElement.textContent = `${player}: Score: ${score}`;
         document.getElementById('scoreBoard').appendChild(newScoreElement);
+    }
+}
+
+function displayMovementStrategy(currentPlayer, player, movementStrategy) {
+    if (currentPlayer === player) {
+        const playerMovementStrategyElement = document.getElementById(`movement-${player}`);
+        if (playerMovementStrategyElement) {
+            playerMovementStrategyElement.textContent = `Current moving strategy: ${movementStrategy}`;
+        } else {
+            const newPlayerMovementStrategyElement = document.createElement('div');
+            newPlayerMovementStrategyElement.id = `movement-${player}`;
+            newPlayerMovementStrategyElement.textContent = `Current moving strategy: ${movementStrategy}`;
+            document.getElementById('currentPlayerMovementStrategy').appendChild(newPlayerMovementStrategyElement);
+        }
     }
 }

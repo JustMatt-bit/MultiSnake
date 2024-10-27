@@ -7,6 +7,8 @@ using System.Linq;
 using JsonLibrary.FromClient;
 using JsonLibrary.FromServer;
 
+using SnakeMultiplayer.Services.Strategies.Movement;
+
 namespace SnakeMultiplayer.Services;
 
 public interface ILobbyService : ISubject
@@ -88,8 +90,8 @@ public class LobbyService : ILobbyService
             return reason;
         }
 
-        var snake = factory.CreateSnake(players, playerName);
-
+        var snake = factory.CreateSnake(players, playerName, new DefaultMovementStrategy());
+         
         if (!players.TryAdd(playerName, snake))
         {
             return "An error has occured. Please try again later.";

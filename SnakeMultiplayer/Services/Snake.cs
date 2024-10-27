@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using SnakeMultiplayer.Services.Strategies.Movement;
+
 using SnakeMultiplayer.Models;
 
 namespace SnakeMultiplayer.Services;
@@ -9,6 +11,7 @@ namespace SnakeMultiplayer.Services;
 public class Snake : IPrototype<Snake>
 {
     private LinkedList<Coordinate> body;
+    public IMovementStrategy MovementStrategy { get; private set; }
     public readonly PlayerColor color;
     public bool IsStriped { get; private set; }
     public bool IsRevived { get; set; }
@@ -17,10 +20,12 @@ public class Snake : IPrototype<Snake>
     public object Player { get; internal set; }
 
 
-    public Snake(PlayerColor color, bool stripes)
+    public Snake(PlayerColor color, bool stripes, IMovementStrategy strategy)
     {
         this.color = color;
         body = new LinkedList<Coordinate>();
+        IsStriped = stripes;
+        MovementStrategy = strategy;
         IsStriped  = stripes;
     }
 
@@ -59,17 +64,10 @@ public class Snake : IPrototype<Snake>
             _ = new Tuple<Coordinate, Coordinate>(null, null);
         }
 
-        var newPosition = body.First.Value.Clone();
-        newPosition.Update(direction);
-        _ = body.AddFirst(newPosition);
-        Tail = null;
+        var result = MovementStrategy.Move(body, Tail, direction, isFood);
+        Tail = result.Item2;
 
-        if (!isFood)
-        {
-            Tail = body.Last.Value.Clone();
-            body.RemoveLast();
-        }
-        return new Tuple<Coordinate, Coordinate>(CloneHead(), Tail);
+        return new Tuple<Coordinate, Coordinate>(CloneHead(result.Item1), Tail);
     }
     /// <summary>
     /// Check whether direction is valid.
@@ -91,6 +89,12 @@ public class Snake : IPrototype<Snake>
         body == null || body.First.Value == null
         ? null
         : body.First.Value.Clone();
+
+    public Coordinate CloneHead(LinkedList<Coordinate> body) =>
+    body == null || body.First.Value == null
+    ? null
+    : body.First.Value.Clone();
+
 
     public List<Coordinate> GetCoordinates() => body?.ToList<Coordinate>();
 
@@ -143,4 +147,11 @@ public class Snake : IPrototype<Snake>
     {
         return body.Select(coord => coord.Clone()).ToList();
     }
+
+    public void SetMovementStrategy(IMovementStrategy strategy)
+    {
+        MovementStrategy = strategy;
+    }
+
+    public IMovementStrategy GetMovementStrategy() => MovementStrategy;
 }
