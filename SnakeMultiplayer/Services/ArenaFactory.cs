@@ -16,11 +16,13 @@ namespace SnakeMultiplayer.Services
     public interface IArenaFactory
     {
         Arena CreateArena(ConcurrentDictionary<string, Snake> players);
-        void CreateObstacles(Arena arena);
+        void CreateObstacles(Arena arena, int count);
         Snake CreateSnake(ConcurrentDictionary<string, Snake> currentSnakes, string playerName, IMovementStrategy movementStrategy);
+        void SetArenaSpeed(Arena arena, Speed speed);
+        Speed GetSpeed();
     }
 
-    public class Level1ArenaFactory : IArenaFactory
+    public class RandomArenaFactory : IArenaFactory
     {
         public Arena CreateArena(ConcurrentDictionary<string, Snake> players)
         {
@@ -30,10 +32,14 @@ namespace SnakeMultiplayer.Services
             return arena;
         }
 
-        public void CreateObstacles(Arena arena)
+        public void SetArenaSpeed(Arena arena, Speed speed){
+            arena.Speed = speed;
+        }
+
+        public void CreateObstacles(Arena arena, int count)
         {
             Random random = new Random();
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i <= count; i++)
             {
                 var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
                 arena.AddObstacle(newObstacle);
@@ -47,6 +53,61 @@ namespace SnakeMultiplayer.Services
 
             return snake;
         }
+
+        public Speed GetSpeed() => Speed.Slow;
+
+        private PlayerColor GetValidPlayerColor(ConcurrentDictionary<string, Snake> p)
+        {
+            var players = p.Values.ToList();
+            var takenColors = players.Select(p => p.color).ToList();
+            var allColors = Enum.GetValues(typeof(PlayerColor)).Cast<PlayerColor>().ToList();
+
+            foreach (var color in allColors)
+            {
+                if (!takenColors.Contains(color))
+                {
+                    return color;
+                }
+            }
+
+            throw new InvalidOperationException("Cannot find unused player color, because all are used.");
+        }
+    }
+
+    public class Level1ArenaFactory : IArenaFactory
+    {
+        public Arena CreateArena(ConcurrentDictionary<string, Snake> players)
+        {
+            Speed speed = Speed.Slow;
+            var arena = new Arena(players, speed);
+            arena.CreateBoard(20, 20);
+            return arena;
+        }
+
+        public void SetArenaSpeed(Arena arena, Speed speed){
+            arena.Speed = speed;
+        }
+
+
+        public void CreateObstacles(Arena arena, int count)
+        {
+            Random random = new Random();
+            for (int i = 0; i <= count; i++)
+            {
+                var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+                arena.AddObstacle(newObstacle);
+            }
+        }
+
+        public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)
+        {
+            var color = GetValidPlayerColor(players);
+            var snake = new Snake(color, false, movementStrategy);
+
+            return snake;
+        }
+
+        public Speed GetSpeed() => Speed.Slow;
 
         private PlayerColor GetValidPlayerColor(ConcurrentDictionary<string, Snake> p)
         {
@@ -76,10 +137,15 @@ namespace SnakeMultiplayer.Services
             return arena;
         }
 
-        public void CreateObstacles(Arena arena)
+        public void SetArenaSpeed(Arena arena, Speed speed){
+            arena.Speed = speed;
+        }
+
+
+        public void CreateObstacles(Arena arena,  int count)
         {
             Random random = new Random();
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i <= count; i++)
             {
                 var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
                 arena.AddObstacle(newObstacle);
@@ -93,6 +159,8 @@ namespace SnakeMultiplayer.Services
 
             return snake;
         }
+
+        public Speed GetSpeed() => Speed.Normal;
 
         private PlayerColor GetValidPlayerColor(ConcurrentDictionary<string, Snake> p)
         {
@@ -122,14 +190,20 @@ namespace SnakeMultiplayer.Services
             return arena;
         }
 
-        public void CreateObstacles(Arena arena)
+        public void SetArenaSpeed(Arena arena, Speed speed){
+            arena.Speed = speed;
+        }
+
+
+        public void CreateObstacles(Arena arena,  int count)
         {
             Random random = new Random();
-            for (int i = 0; i < 10; i++)
+            Coordinate[] obstacleList = new Coordinate[count+1];
+            for (int i = 0; i <= count; i++)
             {
-                var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
-                arena.AddObstacle(newObstacle);
+                obstacleList[i] = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));           
             }
+            arena.AddObstacles(obstacleList);
         }
 
         public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)
@@ -139,6 +213,8 @@ namespace SnakeMultiplayer.Services
 
             return snake;
         }
+
+        public Speed GetSpeed() => Speed.Fast;
 
         private PlayerColor GetValidPlayerColor(ConcurrentDictionary<string, Snake> p)
         {
