@@ -46,6 +46,8 @@ public class LobbyService : ILobbyService
     private List<IObserver> observers = new List<IObserver>();
     private IArenaFactory factory;
 
+    private readonly ArenaDirector director;
+
     readonly Arena Arena;
     readonly int MaxPlayers;
     readonly string HostPlayer;
@@ -57,8 +59,23 @@ public class LobbyService : ILobbyService
         State = LobbyStates.Idle;
         MaxPlayers = maxPlayers;
         factory = ArenaFactoryProvider.GetFactory(level);
-        Arena = factory.CreateArena(players);
-        factory.CreateObstacles(Arena);
+        
+        IArenaBuilder builder;
+
+        if(level == 4){
+            builder = new RandomArenaBuilder(factory);
+        }else{
+            builder = new ArenaBuilder(factory);
+        }
+       
+        director = new ArenaDirector();
+
+        director.SetBuilder(builder);
+
+        int boardSize = 20;
+        int obstacleCount = level * 5;
+        Speed speed = factory.GetSpeed();
+        Arena = director.ConstructArena(players, boardSize, boardSize, obstacleCount, speed);
     }
      public void RegisterObserver(IObserver observer)
     {
@@ -137,15 +154,15 @@ public class LobbyService : ILobbyService
         var activePlayers = players.Values.Where(player => player.IsActive);
         var playerCount = players.Count;
 
-        // Commented out because now the game ends when player reaches certain amount of points, and if an obstacle is hit, they respawn
-        // if (1 < playerCount)
-        // {
-        //     return activePlayers.Count() <= 1;
-        // }
-        // else if (playerCount == 0)
-        // {
-        //     return true;
-        // }
+
+        if (1 < playerCount)
+        {
+            return activePlayers.Count() <= 1;
+        }
+        else if (playerCount == 0)
+        {
+            return true;
+        }
 
         return false;
     }

@@ -15,7 +15,7 @@ namespace SnakeMultiplayer.Services;
 
 public class Arena
 {
-    public Speed Speed { get; private set; }
+    public Speed Speed { get;  set; }
 
     readonly Random Random = new(Guid.NewGuid().GetHashCode());
     readonly ConcurrentDictionary<string, Snake> Snakes;
@@ -187,6 +187,26 @@ public class Arena
         // Set the obstacle position and update the board
         Obstacles.AddLast(new Obstacle(obstaclePosition));
         Board[obstaclePosition.X, obstaclePosition.Y] = Cells.obstacle;
+    }
+
+     public void AddObstacles(Coordinate[] obstaclePosition) {
+        for(int n = 0; n < obstaclePosition.Count(); n++){
+            if (obstaclePosition[n] == null)
+        {
+            throw new ArgumentNullException(nameof(obstaclePosition));
+        }
+
+        // Ensure the obstacle position is within the bounds of the arena
+        if (obstaclePosition[n].X < 0 || obstaclePosition[n].X >= Width || obstaclePosition[n].Y < 0 || obstaclePosition[n].Y >= Height)
+        {
+            throw new ArgumentOutOfRangeException(nameof(obstaclePosition), "Obstacle position is out of bounds.");
+        }
+
+        // Set the obstacle position and update the board
+        Obstacles.AddLast(new Obstacle(obstaclePosition[n]));
+        Board[obstaclePosition[n].X, obstaclePosition[n].Y] = Cells.obstacle;
+        }
+        
     }
 
     public void GenerateStrategyCell()

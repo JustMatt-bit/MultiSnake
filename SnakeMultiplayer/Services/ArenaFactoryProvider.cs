@@ -12,6 +12,7 @@ namespace SnakeMultiplayer.Services
                 1 => new Level1ArenaFactory(),
                 2 => new Level2ArenaFactory(),
                 3 => new Level3ArenaFactory(),
+                4 => new RandomArenaFactory(),
                 _ => throw new ArgumentException("Invalid level", nameof(level)),
             };
         }
