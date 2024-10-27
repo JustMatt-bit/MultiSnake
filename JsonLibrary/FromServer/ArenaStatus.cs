@@ -9,6 +9,7 @@ public class ArenaStatus
 {
     public List<Snake> ActiveSnakes { get; set; }
     public List<string> DisabledSnakes { get; set; }
+    public List<Snake> SnakesToRevive { get; set; }
     public XY food { get; set; }
     public obstacleXY[] obstacles { get; set; }
     public StrategyCellXY StrategyCell { get; set; }
@@ -19,12 +20,12 @@ public class ArenaStatus
         this.obstacles = obstacles;
         ActiveSnakes = new List<Snake>();
         DisabledSnakes = new List<string>();
+        SnakesToRevive = new List<Snake>();
         StrategyCell = strategyCell;
     }
     public void AddActiveSnake(Snake s) => ActiveSnakes.Add(s);
-
     public void AddDisabledSnake(string player) => DisabledSnakes.Add(player);
-
+    public void AddSnakeToRevive(Snake s) => SnakesToRevive.Add(s);
     public static Players Deserialize(string json) => JsonConvert.DeserializeObject<Players>(json);
     public static string Serialize(Players m) => JsonConvert.SerializeObject(m);
 }
@@ -38,14 +39,16 @@ public class Snake
     public XY head { get; set; }
     public XY tail { get; set; }
     public bool isStriped { get; set; }
+    public List<XY> body { get; set; }
     public string movementStrategy { get; set; }
 
-    public Snake(string player, string color, string movementStrategy, XY head, XY tail, int score = 0, bool stripes = false)
+    public Snake(string player, string color, string movementStrategy, XY head, XY tail, List<XY> body, int score = 0, bool stripes = false)
     {
         this.player = player;
         this.color = color;
         this.head = head;
         this.tail = tail;
+        this.body = body;
         this.score = score;
         this.movementStrategy = movementStrategy;
         this.isStriped = stripes;

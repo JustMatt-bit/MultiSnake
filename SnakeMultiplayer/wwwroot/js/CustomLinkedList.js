@@ -12,7 +12,7 @@ class CustomLinkedList {
         this.head = null;
         this.tail = null;
     }
-
+    
     getFirst() {
         return this.head.element.getCopy();
     }

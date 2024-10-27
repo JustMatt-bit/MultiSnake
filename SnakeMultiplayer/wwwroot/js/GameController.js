@@ -179,11 +179,35 @@ class GameController {
         var snakesArray = updateMessage.disabledSnakes;
         for (i = 0; i < snakesArray.length; i++) {
             var player = snakesArray[i];
-
+            console.log(`Disabling snake: ${player}`);
             if (this.snakes[player] != null) {
                 this.cellContainer.clearCoords(this.snakes[player].getBodyArray());
                 this.snakes[player] = null;
+                
             }
+        }
+
+        // Paint snakes to revive
+        var snakesToRevive = updateMessage.snakesToRevive;
+        for (i = 0; i < snakesToRevive.length; i++) {
+            console.log(`Reviving snake: ${snakesToRevive[i]}`);
+            var player = snakesToRevive[i];            
+            var head = snakesToRevive[i].head;
+            var tail = snakesToRevive[i].tail;
+            var player = snakesToRevive[i].player;
+            var bodyArray = snakesToRevive[i].body;
+            var color = snakesToRevive[i].color;
+            var striped = snakesToRevive[i].isStriped;
+
+            var snake = new Snake(player, color, striped);
+            snake.setStartPoint(head.x, head.y);
+            for (var j = 0; j < bodyArray.length; j++) {
+                snake.body.addFirst(bodyArray[j]);
+            }
+            this.snakes[player] = snake;
+            this.snakes[player].updateCoord(head, tail);
+            this.cellContainer.updateSnake(color, head, tail, striped);
+            this.drawSnake(player);
         }
     }
 
@@ -239,6 +263,16 @@ class GameController {
             if (snake != null) {
                 this.cellContainer.initializeSnake(this.snakes[key].getBodyArray(), this.snakes[key].color);
             }
+        }
+    }
+
+    
+    drawSnake(key) {
+        // Draw an existing snake (used for reviving a snake)
+        var snake = this.snakes[key];
+        if (snake != null) {
+            console.log(`Snake body: ${JSON.stringify(snake.getBodyArray())}`);
+            this.cellContainer.initializeSnake(this.snakes[key].getBodyArray(), this.snakes[key].color);
         }
     }
 }
