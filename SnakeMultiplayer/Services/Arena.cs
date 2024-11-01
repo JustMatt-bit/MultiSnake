@@ -2,12 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using System.Threading.Tasks;
-
 using JsonLibrary.FromClient;
 using JsonLibrary.FromServer;
-
 using SnakeMultiplayer.Models;
 using SnakeMultiplayer.Services.Strategies.Movement;
 

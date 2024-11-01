@@ -1,7 +1,10 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
+
+using SnakeMultiplayer.Services.Adapter;
 
 using BC = BCrypt.Net.BCrypt;
 
@@ -16,10 +19,15 @@ namespace SnakeMultiplayer.Services
     public class AuthService : IAuthService
     {
         private readonly string usersFileName;
+        private readonly IFileStorage _textFileStorage;
+        private readonly IFileStorage _jsonFileStorage;
+
 
         public AuthService(IConfiguration configuration)
         {
             usersFileName = configuration["UsersFileName"];
+            _textFileStorage = new TextFileAdapter(delimiter: ":");
+            _jsonFileStorage = new JsonFileAdapter(prettyPrint: true);
         }
 
         public async Task<bool> RegisterAsync(string userName, string password)
@@ -32,7 +40,8 @@ namespace SnakeMultiplayer.Services
             var hashedPassword = BC.HashPassword(password);
             var userEntry = $"{userName}:{hashedPassword}";
 
-            await File.AppendAllTextAsync(usersFileName, userEntry + "\n");
+            await _textFileStorage.SaveDataAsync(usersFileName + ".txt", userEntry);
+            await _jsonFileStorage.SaveDataAsync(usersFileName + ".json", userEntry);
 
             return true;
         }
@@ -53,7 +62,9 @@ namespace SnakeMultiplayer.Services
 
         private async Task<bool> UserExistsAsync(string userName)
         {
-            var lines = await File.ReadAllLinesAsync(usersFileName);
+            var lines = await _textFileStorage.GetDataAsync(usersFileName + ".txt");
+
+            //var lines = await File.ReadAllLinesAsync(usersFileName);
             foreach (var line in lines)
             {
                 var user = line.Split(':')[0];
@@ -67,7 +78,8 @@ namespace SnakeMultiplayer.Services
 
         private async Task<string> GetUserAsync(string userName)
         {
-            var lines = await File.ReadAllLinesAsync(usersFileName);
+            var lines = await _textFileStorage.GetDataAsync(usersFileName + ".txt");
+            //var lines = await File.ReadAllLinesAsync(usersFileName);
             foreach (var line in lines)
             {
                 var user = line.Split(':')[0];
