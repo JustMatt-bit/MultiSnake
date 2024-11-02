@@ -4,8 +4,6 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace SnakeMultiplayer.Services.Adapter
 {
     public class JsonFileAdaptee
@@ -65,7 +63,15 @@ namespace SnakeMultiplayer.Services.Adapter
 
         public async Task<string[]> ReadJsonDataAsync(string path)
         {
-            return await File.ReadAllLinesAsync(path);
+            var lines = await File.ReadAllTextAsync(path);
+            var jsonData = JsonSerializer.Deserialize<Dictionary<string, string>>(lines);
+            var nameHashArray = new List<string>();
+            foreach (var kvp in jsonData)
+            {
+                nameHashArray.Add($"{kvp.Key}:{kvp.Value}");
+            }
+
+            return nameHashArray.ToArray();
         }
     }
 }

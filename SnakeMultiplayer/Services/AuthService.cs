@@ -26,7 +26,7 @@ namespace SnakeMultiplayer.Services
         public AuthService(IConfiguration configuration)
         {
             usersFileName = configuration["UsersFileName"];
-            _textFileStorage = new TextFileAdapter(delimiter: ":");
+            _textFileStorage = new TextFileStorage();
             _jsonFileStorage = new JsonFileAdapter(prettyPrint: true);
         }
 
@@ -79,6 +79,7 @@ namespace SnakeMultiplayer.Services
         private async Task<string> GetUserAsync(string userName)
         {
             var lines = await _textFileStorage.GetDataAsync(usersFileName + ".txt");
+            //var jsonLines = await _jsonFileStorage.GetDataAsync(usersFileName + ".json");
             //var lines = await File.ReadAllLinesAsync(usersFileName);
             foreach (var line in lines)
             {
