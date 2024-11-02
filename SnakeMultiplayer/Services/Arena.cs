@@ -10,6 +10,7 @@ using JsonLibrary.FromServer;
 
 using SnakeMultiplayer.Models;
 using SnakeMultiplayer.Services.Strategies.Movement;
+using SnakeMultiplayer.Services.Appearance;
 
 namespace SnakeMultiplayer.Services;
 
@@ -44,6 +45,7 @@ public class Arena
         Speed = speed;
     }
 
+
     public void CreateBoard(int width, int height) {
         Width = width;
         Height = height;
@@ -75,11 +77,13 @@ public class Arena
                 var head = snake.Value.CloneHead().ConvertToXY();
                 var tail = snake.Value.Tail?.ConvertToXY();
                 var color = snake.Value.GetColorString();
+                var shape = snake.Value.shape;
                 var score = GetScore(snake.Key);
                 var isStriped = snake.Value.IsStriped;
+                var appearance = snake.Value.Appearance;
                 var body = snake.Value.GetBodyAsCoordinateList().Select(coord => coord.ConvertToXY()).ToList(); // Convert to List<XY>
                 var currentMovingStrategy = snake.Value.GetMovementStrategy().ToString();
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, currentMovingStrategy, head, tail, body, score, isStriped);
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, currentMovingStrategy, head, tail, body, score, isStriped, appearance.ShapeName);
                 report.AddSnakeToRevive(tempSnake);
                 snake.Value.IsRevived = false;
             }
@@ -90,8 +94,9 @@ public class Arena
                 var color = snake.Value.GetColorString();
                 var score = GetScore(snake.Key);
                 var isStriped = snake.Value.IsStriped;
+                var appearance = snake.Value.Appearance;
                 var currentMovingStrategy = snake.Value.GetMovementStrategy().ToString();
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, currentMovingStrategy, head, tail, null, score, isStriped);
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, currentMovingStrategy, head, tail, null, score, isStriped, appearance.ShapeName);
                 report.AddActiveSnake(tempSnake);
             }
         }

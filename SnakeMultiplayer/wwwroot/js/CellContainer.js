@@ -39,11 +39,12 @@
         }
     }
 
-    initializeSnake(snakeBody, color) {
+    initializeSnake(snakeBody, color, shape) {
         //iterate through snakeBody
+
         var i;
         for (i = 0; i < snakeBody.length; i++) {
-            this.updateSnake(color, snakeBody[i]);
+            this.updateSnake(color, snakeBody[i], null, null, shape);
         }
     }
 
@@ -56,36 +57,59 @@
         return color;
     }
 
-    updateSnake(snakeColor, head, tail = null, striped = false) {
+    updateSnake(snakeColor, head, tail = null, striped = false, shape) {
         if (striped) {
-            this.drawCell(head.x, head.y, this.getRandomColor());
+            this.drawCell(head.x, head.y, this.getRandomColor(), shape);
         } else {
-            this.drawCell(head.x, head.y, snakeColor); 
+            this.drawBaseCell(head.x, head.y, "white", "square"); 
+            this.drawCell(head.x, head.y, snakeColor, shape); 
         }
         if (tail !== null) {
-            this.drawCell(tail.x, tail.y, this.baseCellParams.innerColor);
+            this.drawCell(tail.x, tail.y, this.baseCellParams.innerColor, "square");
         }
     }
 
-    drawCell(x, y, fillColor) {
+    drawShape(x, y, fillColor, outlineColor, shape) {
         var coordx = this.getCellCoord(x);
         var coordy = this.getCellCoord(y);
-        DrawFillRenctangle(coordx, coordy, this.baseCellParams.size, fillColor);
-        DrawOutlineRectangle(coordx, coordy, this.baseCellParams.size, this.baseCellParams.outlineColor);
+        switch (shape) {
+            case "circle":
+                DrawFillCircle(coordx + this.baseCellParams.size / 2, coordy + this.baseCellParams.size / 2, this.baseCellParams.size / 2, fillColor);
+                DrawOutlineCircle(coordx + this.baseCellParams.size / 2, coordy + this.baseCellParams.size / 2, this.baseCellParams.size / 2, outlineColor);
+                break;
+
+            case "triangle":
+                DrawFillTriangle(coordx + this.baseCellParams.size / 2, coordy + this.baseCellParams.size / 2, this.baseCellParams.size, fillColor);
+                DrawOutlineTriangle(coordx + this.baseCellParams.size / 2, coordy + this.baseCellParams.size / 2, this.baseCellParams.size, outlineColor);
+                break;
+
+            case "ellipse":
+                DrawFillEllipse(coordx + this.baseCellParams.size / 2, coordy + this.baseCellParams.size / 2, this.baseCellParams.size / 2, this.baseCellParams.size / 4, fillColor);
+                DrawOutlineEllipse(coordx + this.baseCellParams.size / 2, coordy + this.baseCellParams.size / 2, this.baseCellParams.size / 2, this.baseCellParams.size / 4, outlineColor);
+                break;
+            
+            case "polygon":
+                DrawFillPolygon(coordx + this.baseCellParams.size / 2, coordy + this.baseCellParams.size / 2, this.baseCellParams.size / 2, 8, fillColor);
+                DrawOutlinePolygon(coordx + this.baseCellParams.size / 2, coordy + this.baseCellParams.size / 2, this.baseCellParams.size / 2, 8, outlineColor);
+                break;
+
+            default: 
+                DrawFillRenctangle(coordx, coordy, this.baseCellParams.size, fillColor);
+                DrawOutlineRectangle(coordx, coordy, this.baseCellParams.size, outlineColor);
+                break;
+        }
     }
 
-    drawBaseCell(x, y) {
-        var coordx = this.getCellCoord(x);
-        var coordy = this.getCellCoord(y);
-        DrawFillRenctangle(coordx, coordy, this.baseCellParams.size, this.baseCellParams.innerColor);
-        DrawOutlineRectangle(coordx, coordy, this.baseCellParams.size, this.baseCellParams.outlineColor);
+    drawCell(x, y, fillColor, shape) {
+        this.drawShape(x, y, fillColor, this.baseCellParams.outlineColor, shape);
     }
 
-    drawCustomCell(cell) {
-        var xCoord = this.getCellCoord(cell.x);
-        var yCoord = this.getCellCoord(cell.y);
-        DrawFillRenctangle(xCoord, yCoord, cell.size, cell.innerColor);
-        DrawOutlineRectangle(xCoord, yCoord, cell.size, cell.outlineColor);
+    drawBaseCell(x, y, shape) {
+        this.drawShape(x, y, this.baseCellParams.innerColor, this.baseCellParams.outlineColor, shape);
+    }
+
+    drawCustomCell(cell, shape) {
+        this.drawShape(cell.x, cell.y, cell.innerColor, cell.outlineColor, shape);
     }
 
     getCellCoord(cellNumber) {
