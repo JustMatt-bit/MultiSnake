@@ -34,12 +34,38 @@ public enum Cells
     strategyChange = 4
 }
 
+
+public enum Shapes
+{
+    circle,
+    square,
+    triangle,
+    ellipse,
+    polygon
+}
+
 public enum PlayerColor
 {
     greenyellow,
     dodgerblue,
     orange,
     mediumpurple,
+    crimson,
+    coral,
+    gold,
+    lightseagreen,
+    slateblue,
+    tomato,
+    lavender,
+    mediumseagreen,
+    darkorange,
+    lightcoral,
+    plum,
+    palevioletred,
+    teal,
+    lightblue,
+    forestgreen,
+    darkviolet
 }
 
 public enum LobbyStates

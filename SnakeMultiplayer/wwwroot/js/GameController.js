@@ -1,9 +1,10 @@
 ﻿class Snake {
-    constructor(name, color, stripes) {
+    constructor(name, color, stripes, shape) {
         this.body = new CustomLinkedList();
         this.name = name;
         this.color = color;
         this.isStriped = stripes;
+        this.shape = shape;
     }
 
     setStartPoint(x, y) {
@@ -132,9 +133,10 @@ class GameController {
             var player = snakesArray[i].player;
             var color = snakesArray[i].color;
             var striped = snakesArray[i].isStriped;
+            var shape = snakesArray[i].shape;
 
             //this.cellContainer.updateSnake(color, head, tail);
-            var snake = new Snake(player, color, striped);
+            var snake = new Snake(player, color, striped, shape);
             snake.setStartPoint(head.x, head.y);
             //this.snakes.push(snake);
             this.snakes[player] = snake;
@@ -147,7 +149,6 @@ class GameController {
         if (food !== null) {
             this.cellContainer.drawCell(food.x, food.y, "black");
         }
-
         const strategyCell = updateMessage.strategyCell;
         if (strategyCell) {
             this.cellContainer.drawCell(strategyCell.position.x, strategyCell.position.y, strategyCell.color)
@@ -164,13 +165,14 @@ class GameController {
             var score = snakesArray[i].score;
             var striped = snakesArray[i].isStriped;
             var movementStrategy = snakesArray[i].movementStrategy;
+            var shape = snakesArray[i].shape;
             console.log(`Updating score for ${player}: ${score}`);
             console.log(`Movement strat: ${movementStrategy}`)
             console.log(`Logged in player: ${playerName}`)
 
 
             this.snakes[player].updateCoord(head, tail);
-            this.cellContainer.updateSnake(color, head, tail, striped);
+            this.cellContainer.updateSnake(color, head, tail, striped, shape);
             updatePlayerScore(player, score); // Update the player's score
             displayMovementStrategy(playerName, player, movementStrategy);
         }
@@ -198,15 +200,16 @@ class GameController {
             var bodyArray = snakesToRevive[i].body;
             var color = snakesToRevive[i].color;
             var striped = snakesToRevive[i].isStriped;
+            var shape = snakesToRevive[i].shape;
 
-            var snake = new Snake(player, color, striped);
+            var snake = new Snake(player, color, striped, shape);
             snake.setStartPoint(head.x, head.y);
             for (var j = 0; j < bodyArray.length; j++) {
                 snake.body.addFirst(bodyArray[j]);
             }
             this.snakes[player] = snake;
             this.snakes[player].updateCoord(head, tail);
-            this.cellContainer.updateSnake(color, head, tail, striped);
+            this.cellContainer.updateSnake(color, head, tail, striped, shape);
             this.drawSnake(player);
         }
     }
@@ -261,7 +264,7 @@ class GameController {
         for (var key in this.snakes) {
             var snake = this.snakes[key];
             if (snake != null) {
-                this.cellContainer.initializeSnake(this.snakes[key].getBodyArray(), this.snakes[key].color);
+                this.cellContainer.initializeSnake(this.snakes[key].getBodyArray(), this.snakes[key].color, this.snakes[key].shape);
             }
         }
     }
@@ -272,7 +275,7 @@ class GameController {
         var snake = this.snakes[key];
         if (snake != null) {
             console.log(`Snake body: ${JSON.stringify(snake.getBodyArray())}`);
-            this.cellContainer.initializeSnake(this.snakes[key].getBodyArray(), this.snakes[key].color);
+            this.cellContainer.initializeSnake(this.snakes[key].getBodyArray(), this.snakes[key].color,this.snakes[key].shape);
         }
     }
 }

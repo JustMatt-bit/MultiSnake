@@ -9,6 +9,7 @@ using JsonLibrary.FromServer;
 
 using Microsoft.AspNetCore.HttpOverrides;
 
+using SnakeMultiplayer.Services.Appearance;
 using SnakeMultiplayer.Services.Strategies.Movement;
 
 namespace SnakeMultiplayer.Services
@@ -48,8 +49,7 @@ namespace SnakeMultiplayer.Services
 
         public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)
         {
-            var color = GetValidPlayerColor(players);
-            var snake = new Snake(color, false, movementStrategy);
+            var snake = new Snake(false, movementStrategy, new RandomShape(new RandomColor()));
 
             return snake;
         }
@@ -102,7 +102,7 @@ namespace SnakeMultiplayer.Services
         public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)
         {
             var color = GetValidPlayerColor(players);
-            var snake = new Snake(color, false, movementStrategy);
+            var snake = new Snake(false, movementStrategy, new CircleShape(new CustomColor(color)));
 
             return snake;
         }
@@ -155,7 +155,7 @@ namespace SnakeMultiplayer.Services
         public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)
         {
             var color = GetValidPlayerColor(players);
-            var snake = new Snake(color, false, movementStrategy);
+            var snake = new Snake(false, movementStrategy, new CircleShape(new CustomColor(color)));
 
             return snake;
         }
@@ -209,7 +209,7 @@ namespace SnakeMultiplayer.Services
         public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)
         {
             var color = GetValidPlayerColor(players);
-            var snake = new Snake(color, true, movementStrategy);
+            var snake = new Snake(true, movementStrategy, new PolygonShape(new CustomColor(color)));
 
             return snake;
         }

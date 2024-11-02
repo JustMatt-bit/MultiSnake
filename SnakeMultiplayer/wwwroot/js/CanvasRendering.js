@@ -70,7 +70,6 @@ function DrawBaseCanvas() {
     CanvasContext.fillStyle = "white";
     CanvasContext.fillRect(TLborder, TLborder, BRborder, BRborder);
     CanvasContext.stroke();
-
     DrawCanvasBorder();
 }
 function DrawCanvasBorder() {
@@ -93,6 +92,49 @@ function DrawOutlineRectangle(x, y, length, outlineColor) {
     CanvasContext.rect(x, y, length, length);
     CanvasContext.stroke();
 }
+// Function to draw a filled circle
+function DrawFillCircle(x, y, radius, fillColor) {
+    CanvasContext.fillStyle = fillColor;
+    CanvasContext.beginPath();
+    CanvasContext.arc(x, y, radius, 0, Math.PI * 2, false);
+    CanvasContext.fill();
+}
+
+// Function to draw an outlined circle
+function DrawOutlineCircle(x, y, radius, outlineColor) {
+    CanvasContext.strokeStyle = outlineColor;
+    CanvasContext.beginPath();
+    CanvasContext.arc(x, y, radius, 0, Math.PI * 2, false);
+    CanvasContext.stroke();
+}
+//Triangle
+function DrawFillTriangle(x, y, size, fillColor) {
+    const halfSize = size / 2;
+    const height = (Math.sqrt(3) / 2) * size;
+
+    CanvasContext.fillStyle = fillColor;
+    CanvasContext.beginPath();
+    CanvasContext.moveTo(x, y - height / 2); // Top point
+    CanvasContext.lineTo(x - halfSize, y + height / 2); // Bottom left point
+    CanvasContext.lineTo(x + halfSize, y + height / 2); // Bottom right point
+    CanvasContext.closePath();
+    CanvasContext.fill();
+}
+//Triangle
+function DrawOutlineTriangle(x, y, size, outlineColor) {
+    const halfSize = size / 2;
+    const height = (Math.sqrt(3) / 2) * size;
+
+    CanvasContext.strokeStyle = outlineColor;
+    CanvasContext.lineWidth = 1; // Set a reasonable line width
+    CanvasContext.beginPath();
+    CanvasContext.moveTo(x, y - height / 2); // Top point
+    CanvasContext.lineTo(x - halfSize, y + height / 2); // Bottom left point
+    CanvasContext.lineTo(x + halfSize, y + height / 2); // Bottom right point
+    CanvasContext.closePath();
+    CanvasContext.stroke();
+}
+
 
 function DrawRectangle(x, y, xx, yy, fillColor, outlineColor) {
     CanvasContext.fillStyle = fillColor;
@@ -100,6 +142,49 @@ function DrawRectangle(x, y, xx, yy, fillColor, outlineColor) {
     CanvasContext.strokeStyle = outlineColor;
     CanvasContext.rect(x, y, xx, yy);
     CanvasContext.stroke();
+}
+
+
+
+function DrawFillEllipse(x, y, radiusX, radiusY, fillColor) {
+    CanvasContext.fillStyle = fillColor;
+    CanvasContext.beginPath();
+    CanvasContext.ellipse(x, y, radiusX, radiusY, 0, 0, Math.PI * 2); // Draw ellipse
+    CanvasContext.fill();
+}
+
+function DrawOutlineEllipse(x, y, radiusX, radiusY, outlineColor) {
+    CanvasContext.strokeStyle = outlineColor;
+    CanvasContext.beginPath();
+    CanvasContext.ellipse(x, y, radiusX, radiusY, 0, 0, Math.PI * 2); // Draw ellipse
+    CanvasContext.stroke();
+}
+
+
+function DrawFillPolygon(x, y, radius, sides, fillColor) {
+    CanvasContext.fillStyle = fillColor;
+    CanvasContext.beginPath();
+    for (let i = 0; i < sides; i++) {
+        const angle = (i * 2 * Math.PI) / sides; 
+        const vertexX = x + radius * Math.cos(angle);
+        const vertexY = y + radius * Math.sin(angle);
+        CanvasContext.lineTo(vertexX, vertexY); 
+    }
+    CanvasContext.closePath();
+    CanvasContext.fill(); 
+}
+
+function DrawOutlinePolygon(x, y, radius, sides, outlineColor) {
+    CanvasContext.strokeStyle = outlineColor;
+    CanvasContext.beginPath(); 
+    for (let i = 0; i < sides; i++) {
+        const angle = (i * 2 * Math.PI) / sides;
+        const vertexX = x + radius * Math.cos(angle);
+        const vertexY = y + radius * Math.sin(angle);
+        CanvasContext.lineTo(vertexX, vertexY); 
+    }
+    CanvasContext.closePath(); 
+    CanvasContext.stroke(); 
 }
 
 function DrawText(text, startx, starty, fontSize) {

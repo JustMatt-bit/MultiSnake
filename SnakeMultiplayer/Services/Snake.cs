@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using SnakeMultiplayer.Services.Strategies.Movement;
-
+using SnakeMultiplayer.Services.Appearance;
 using SnakeMultiplayer.Models;
 
 namespace SnakeMultiplayer.Services;
@@ -12,7 +12,10 @@ public class Snake : IPrototype<Snake>
 {
     private LinkedList<Coordinate> body;
     public IMovementStrategy MovementStrategy { get; private set; }
+    public SnakeAppearance Appearance { get; private set; }
     public readonly PlayerColor color;
+
+    public string shape { get; private set; }
     public bool IsStriped { get; private set; }
     public bool IsRevived { get; set; }
     public bool IsActive { get; private set; }
@@ -20,14 +23,14 @@ public class Snake : IPrototype<Snake>
     public object Player { get; internal set; }
 
 
-    public Snake(PlayerColor color, bool stripes, IMovementStrategy strategy)
-    {
-        this.color = color;
+    public Snake(bool stripes, IMovementStrategy strategy, SnakeAppearance appearance)
+    {   
+        Appearance = appearance;
         body = new LinkedList<Coordinate>();
         IsStriped = stripes;
         MovementStrategy = strategy;
-        IsStriped  = stripes;
     }
+
 
     public Snake Clone() 
     {
@@ -137,7 +140,7 @@ public class Snake : IPrototype<Snake>
         return list;
     }
 
-    public string GetColorString() => Enum.GetName(typeof(PlayerColor), color);
+    public string GetColorString() => Enum.GetName(typeof(PlayerColor), Appearance.Color);
 
     public Coordinate[] GetBodyArray(){
         return body.ToArray();
