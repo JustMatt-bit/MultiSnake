@@ -1,10 +1,23 @@
 ﻿class CellGridContainer {
+    previousHead = null
     constructor(gridSize, baseCellParams, canvasCtx, startBorder, endBorder) {
         this.gridSize = gridSize;
         this.baseCellParams = baseCellParams;
         this.canvasCtx = canvasCtx;
         this.startBorder = startBorder;
         this.endBorder = endBorder;
+
+        this.initializeDecorators();
+    }
+
+    initializeDecorators() {
+        try {
+            this.outlineDecorator = new CrownOutlineDecorator(this.canvasCtx, this.baseCellParams.size, this.startBorder);
+            this.coloredDecorator = new ColoredCrownDecorator(this.canvasCtx, this.baseCellParams, this.startBorder, this.outlineDecorator);
+            this.fullCrownDecorator = new FullCrownDecorator(this.canvasCtx, this.baseCellParams, this.startBorder, this.coloredDecorator);
+        } catch (error) {
+            console.error(error, "An error occurred while trying to initialize decorators")
+        }
     }
 
     createGrid(draw = true) {
@@ -57,21 +70,52 @@
         return color;
     }
 
-    updateSnake(snakeColor, head, tail = null, striped = false, shape) {
+    getCrownDecorator(crownStage) {
+        console.log(crownStage)
+        switch (crownStage) {
+            case "FullWithJewels":
+                return this.fullCrownDecorator;
+            case "Colored":
+                return this.coloredDecorator;
+            case "Outline":
+                return this.outlineDecorator;
+            default:
+                return null;
+        }
+    }
+
+    updateSnake(snakeColor, head, tail = null, striped = false, shape, crownStage = null) {
+        if (this.previousHead) {
+            if (striped) {
+                this.drawCell(this.previousHead.x, this.previousHead.y, this.getRandomColor(), shape);
+            } else {
+                this.drawBaseCell(this.previousHead.x, this.previousHead.y, "white", "square");
+                this.drawCell(this.previousHead.x, this.previousHead.y, snakeColor, shape);
+            }
+        }
+
         if (striped) {
             this.drawCell(head.x, head.y, this.getRandomColor(), shape);
         } else {
             this.drawBaseCell(head.x, head.y, "white", "square"); 
             this.drawCell(head.x, head.y, snakeColor, shape); 
+
+            const crownDecorator = this.getCrownDecorator(crownStage);
+            if (crownDecorator) {
+                crownDecorator.drawCrown(head.x, head.y);
+            }
         }
         if (tail !== null) {
             this.drawCell(tail.x, tail.y, this.baseCellParams.innerColor, "square");
         }
+
+        this.previousHead = { x: head.x, y: head.y };
     }
 
     drawShape(x, y, fillColor, outlineColor, shape) {
         var coordx = this.getCellCoord(x);
         var coordy = this.getCellCoord(y);
+
         switch (shape) {
             case "circle":
                 DrawFillCircle(coordx + this.baseCellParams.size / 2, coordy + this.baseCellParams.size / 2, this.baseCellParams.size / 2, fillColor);

@@ -42,8 +42,9 @@ public class Snake
     public bool isStriped { get; set; }
     public List<XY> body { get; set; }
     public string movementStrategy { get; set; }
+    public string crownStage { get; set; }
 
-    public Snake(string player, string color, string movementStrategy, XY head, XY tail, List<XY> body, int score = 0, bool stripes = false, string shape = "square")
+    public Snake(string player, string color, string movementStrategy, XY head, XY tail, List<XY> body, int score = 0, bool stripes = false, string shape = "square", string crownStage = null)
     {
         this.player = player;
         this.color = color;
@@ -54,6 +55,7 @@ public class Snake
         this.shape = shape;
         this.movementStrategy = movementStrategy;
         this.isStriped = stripes;
+        this.crownStage = crownStage;
     }
 }
 

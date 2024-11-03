@@ -138,7 +138,7 @@ public class LobbyService : ILobbyService
     public ArenaStatus UpdateLobbyState()
     {
         Arena.UpdateActions();
-        if(Arena.GetScores().Any(score => score.Value >= 10)){
+        if(Arena.GetScores().Any(score => score.Value >= 15)){
             Arena.GenerateReport();
             NotifyObservers("end", "end");
         }
