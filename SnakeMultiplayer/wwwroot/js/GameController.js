@@ -54,6 +54,14 @@ class GameController {
         this.signalRController.connect();
     }
 
+    sendCommand(command) {
+        this.signalRController.handleCommand(command);
+    }
+
+    sendUndo() {
+        this.signalRController.handleUndo();
+    }
+
     onOpenedSocket(e) {
         console.log("Socket opened");
         this.sendPlayerListRequest();

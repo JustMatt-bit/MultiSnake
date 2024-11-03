@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using SnakeMultiplayer.Controllers;
+
 using SnakeMultiplayer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,7 @@ builder.Services.AddSingleton<ITimerService, TimerService>();
 builder.Services.AddSingleton<IScoringService, ScoringService>();
 builder.Services.AddTransient<IServerHub, ServerHub>();
 builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddSingleton<ICommandService, CommandService>();
 builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

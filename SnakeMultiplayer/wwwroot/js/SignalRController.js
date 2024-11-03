@@ -35,6 +35,14 @@
         }
     }
 
+    handleCommand(command) {
+        this.connection.invoke("HandleCommand", command);
+    }
+
+    handleUndo() {
+        this.connection.invoke("HandleUndo");
+    }
+
     onPing(message) {
         console.warn("Ping recieved from Server:", message);
     }

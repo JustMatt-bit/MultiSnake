@@ -7,6 +7,8 @@ using JsonLibrary.FromClient;
 
 using Microsoft.AspNetCore.SignalR;
 
+using SnakeMultiplayer.Controllers;
+
 namespace SnakeMultiplayer.Services;
 
 public class LobbyHub : Hub
@@ -32,12 +34,27 @@ public class LobbyHub : Hub
     readonly IGameServerService GameServer;
     readonly ITimerService TimerService;
     readonly IServerHub ServerHub;
+    readonly ICommandService _commandService;
 
-    public LobbyHub(IGameServerService gameServer, ITimerService timerService, IServerHub serverHub)
+    public LobbyHub(IGameServerService gameServer, ITimerService timerService, IServerHub serverHub, ICommandService commandService)
     {
+        Console.WriteLine("LobbyHub created");
         GameServer = gameServer;
         TimerService = timerService;
         ServerHub = serverHub;
+        _commandService = commandService;
+    }
+
+    public async Task HandleCommand(string command)
+    {
+        _commandService.HandleCommand(this, command);
+        await Task.CompletedTask;
+    }
+
+    public async Task HandleUndo()
+    {
+        _commandService.UndoCommand(this);
+        await Task.CompletedTask;
     }
 
     public async Task Ping()

@@ -39,6 +39,34 @@
 
     var keyDownController = {};
 
+    document.addEventListener("DOMContentLoaded", function () {
+        const commandInput = document.getElementById("commandInput");
+        const sendCommandButton = document.getElementById("sendCommandButton");
+    
+        sendCommandButton.addEventListener("click", function () {
+            const command = commandInput.value.trim();
+            if (command) {
+                if (command === "undo") {
+                    gameController.sendUndo();
+                    commandInput.value = "";
+                    return;
+                }
+                gameController.sendCommand(command);
+                commandInput.value = "";
+            }
+        });
+    
+        commandInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                sendCommandButton.click();
+            }
+        });
+
+        sendUndoButton.addEventListener("click", function () {
+            gameController.sendUndo();
+        });
+    });
+
     document.onkeydown = function (e) {
         switch (e.key) {
             case 'ArrowUp':
