@@ -5,6 +5,7 @@ using System.Linq;
 using SnakeMultiplayer.Services.Strategies.Movement;
 using SnakeMultiplayer.Services.Appearance;
 using SnakeMultiplayer.Models;
+using SnakeMultiplayer.Services.Decorator;
 
 namespace SnakeMultiplayer.Services;
 
@@ -14,6 +15,7 @@ public class Snake : IPrototype<Snake>
     public IMovementStrategy MovementStrategy { get; private set; }
     public SnakeAppearance Appearance { get; private set; }
     public readonly PlayerColor color;
+    public CrownStage CrownStage { get; private set; }
 
     public string shape { get; private set; }
     public bool IsStriped { get; private set; }
@@ -157,4 +159,16 @@ public class Snake : IPrototype<Snake>
     }
 
     public IMovementStrategy GetMovementStrategy() => MovementStrategy;
+
+    public void UpdateCrownStage(int score)
+    {
+        if (score >= 10)
+            this.CrownStage = CrownStage.FullWithJewels;
+        else if (score >= 5)
+            this.CrownStage = CrownStage.Colored;
+        else if (score >= 1)
+            this.CrownStage = CrownStage.Outline;
+        else
+            this.CrownStage = CrownStage.None;
+    }
 }

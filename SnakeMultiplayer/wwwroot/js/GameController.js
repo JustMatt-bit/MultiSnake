@@ -174,13 +174,12 @@ class GameController {
             var striped = snakesArray[i].isStriped;
             var movementStrategy = snakesArray[i].movementStrategy;
             var shape = snakesArray[i].shape;
+            var crownStage = snakesArray[i].crownStage;
             console.log(`Updating score for ${player}: ${score}`);
             console.log(`Movement strat: ${movementStrategy}`)
-            console.log(`Logged in player: ${playerName}`)
-
 
             this.snakes[player].updateCoord(head, tail);
-            this.cellContainer.updateSnake(color, head, tail, striped, shape);
+            this.cellContainer.updateSnake(color, head, tail, striped, shape, crownStage);
             updatePlayerScore(player, score); // Update the player's score
             displayMovementStrategy(playerName, player, movementStrategy);
         }

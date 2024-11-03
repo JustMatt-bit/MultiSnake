@@ -80,7 +80,8 @@ public class Arena
                 var appearance = snake.Value.Appearance;
                 var body = snake.Value.GetBodyAsCoordinateList().Select(coord => coord.ConvertToXY()).ToList(); // Convert to List<XY>
                 var currentMovingStrategy = snake.Value.GetMovementStrategy().ToString();
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, currentMovingStrategy, head, tail, body, score, isStriped, appearance.ShapeName);
+                var crownStage = snake.Value.CrownStage.ToString();
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, currentMovingStrategy, head, tail, body, score, isStriped, appearance.ShapeName, crownStage);
                 report.AddSnakeToRevive(tempSnake);
                 snake.Value.IsRevived = false;
             }
@@ -93,7 +94,8 @@ public class Arena
                 var isStriped = snake.Value.IsStriped;
                 var appearance = snake.Value.Appearance;
                 var currentMovingStrategy = snake.Value.GetMovementStrategy().ToString();
-                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, currentMovingStrategy, head, tail, null, score, isStriped, appearance.ShapeName);
+                var crownStage = snake.Value.CrownStage.ToString();
+                var tempSnake = new JsonLibrary.FromServer.Snake(snake.Key, color, currentMovingStrategy, head, tail, null, score, isStriped, appearance.ShapeName, crownStage);
                 report.AddActiveSnake(tempSnake);
             }
         }
@@ -402,7 +404,9 @@ public class Arena
             {
                 Food = null;
                 moveResult = snake.Value.Move(currAction, true);
-                Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+                var currentScore = Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+                snake.Value.UpdateCrownStage(currentScore);
+                
                 Console.WriteLine($"Player {snake.Key} scored. Current score: {Scores[snake.Key]}");
             }
             else if (Board[newHead.X, newHead.Y].Equals(Cells.strategyChange))
@@ -421,14 +425,18 @@ public class Arena
                 snake.Value.SetMovementStrategy(newMovementStrategy);
 
                 moveResult = snake.Value.Move(currAction, false);
-                Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+                var currentScore = Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+                snake.Value.UpdateCrownStage(currentScore);
+
             }
             else if (Board[newHead.X, newHead.Y].Equals(Cells.snake))
             {
                 if (snake.Value.GetMovementStrategy() is InverseMovementStrategy || snake.Value.GetMovementStrategy() is ZigZagMovementStrategy)
                 {
                     moveResult = snake.Value.Move(currAction, false);
-                    Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+                    var currentScore = Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+                    snake.Value.UpdateCrownStage(currentScore);
+
                 }
                 else
                 {
