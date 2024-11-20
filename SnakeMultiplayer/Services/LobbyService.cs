@@ -65,7 +65,7 @@ public class LobbyService : ILobbyService
         if(level == 4){
             builder = new RandomArenaBuilder(factory);
         }else{
-            builder = new ArenaBuilder(factory);
+            builder = new StandardArenaBuilder(factory);
         }
        
         director = new ArenaDirector();
