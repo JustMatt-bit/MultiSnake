@@ -8,6 +8,7 @@ using JsonLibrary.FromServer;
 using SnakeMultiplayer.Models;
 using SnakeMultiplayer.Services.Strategies.Movement;
 using SnakeMultiplayer.Services.Appearance;
+using SnakeMultiplayer.Services.Composite;
 
 namespace SnakeMultiplayer.Services;
 
@@ -193,24 +194,13 @@ public class Arena
         Board[obstaclePosition.X, obstaclePosition.Y] = Cells.obstacle;
     }
 
-     public void AddObstacles(Coordinate[] obstaclePosition) {
-        for(int n = 0; n < obstaclePosition.Count(); n++){
-            if (obstaclePosition[n] == null)
+    public void AddObstacles(IObstacleComponent obstacles)
+    {
+        for (var iterator = obstacles.CreateIterator(); iterator.HasNext();)
         {
-            throw new ArgumentNullException(nameof(obstaclePosition));
+            var obstacle = iterator.Next();
+            obstacle.AddToBoard(this);    
         }
-
-        // Ensure the obstacle position is within the bounds of the arena
-        if (obstaclePosition[n].X < 0 || obstaclePosition[n].X >= Width || obstaclePosition[n].Y < 0 || obstaclePosition[n].Y >= Height)
-        {
-            throw new ArgumentOutOfRangeException(nameof(obstaclePosition), "Obstacle position is out of bounds.");
-        }
-
-        // Set the obstacle position and update the board
-        Obstacles.AddLast(new Obstacle(obstaclePosition[n]));
-        Board[obstaclePosition[n].X, obstaclePosition[n].Y] = Cells.obstacle;
-        }
-        
     }
 
     public void GenerateStrategyCell()

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Concurrent;
+
+using SnakeMultiplayer.Services.Composite;
 using SnakeMultiplayer.Services.Strategies.Movement;
 
 namespace SnakeMultiplayer.Services
@@ -27,7 +29,7 @@ namespace SnakeMultiplayer.Services
             return this;
         }
 
-        public abstract IArenaBuilder AddObstacles(int count);
+        public abstract IArenaBuilder AddObstacles(IObstacleComponent obstacles);
 
         public Arena Build()
         {
@@ -35,12 +37,12 @@ namespace SnakeMultiplayer.Services
         }
 
         // Template method
-        public Arena ConstructArena(ConcurrentDictionary<string, Snake> players, int width, int height, int obstacleCount, Speed speed)
+        public Arena ConstructArena(ConcurrentDictionary<string, Snake> players, int width, int height, IObstacleComponent obstacles, Speed speed)
         {
             Start(players);
             SetSpeed(speed);
             SetBoardSize(width, height);
-            AddObstacles(obstacleCount);
+            AddObstacles(obstacles);
             return Build();
         }
     }
@@ -59,11 +61,9 @@ namespace SnakeMultiplayer.Services
             return this;
         }
 
-        public override IArenaBuilder AddObstacles(int count)
+        public override IArenaBuilder AddObstacles(IObstacleComponent obstacles)
         {
-            Random random = new Random();
-            int counRand = random.Next(5, 100);
-            _factory.CreateObstacles(_arena, counRand);
+            _arena.AddObstacles(obstacles);
             return this;
         }
     }
@@ -78,9 +78,9 @@ namespace SnakeMultiplayer.Services
             return this;
         }
 
-        public override IArenaBuilder AddObstacles(int count)
+        public override IArenaBuilder AddObstacles(IObstacleComponent obstacles)
         {
-            _factory.CreateObstacles(_arena, count);
+            _arena.AddObstacles(obstacles);
             return this;
         }
     }
