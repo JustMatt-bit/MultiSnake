@@ -8,6 +8,7 @@ using JsonLibrary.FromServer;
 using SnakeMultiplayer.Models;
 using SnakeMultiplayer.Services.Strategies.Movement;
 using SnakeMultiplayer.Services.Appearance;
+using SnakeMultiplayer.Services.Flyweight;
 
 namespace SnakeMultiplayer.Services;
 
@@ -18,6 +19,7 @@ public class Arena
     readonly Random Random = new(Guid.NewGuid().GetHashCode());
     readonly ConcurrentDictionary<string, Snake> Snakes;
     private Dictionary<string, Snake> clonedSnakes = new Dictionary<string, Snake>();
+    private readonly ObstacleFlyweightFactory _obstacleFactory = new();
 
     readonly ConcurrentDictionary<string, MoveDirection> PendingActions;
     readonly int _strategiesCount = 4;
@@ -188,29 +190,33 @@ public class Arena
             throw new ArgumentOutOfRangeException(nameof(obstaclePosition), "Obstacle position is out of bounds.");
         }
 
+        var obstacleType = _obstacleFactory.GetFlyWeight("red");
+        obstacleType.SetPosition(obstaclePosition);
+
         // Set the obstacle position and update the board
-        Obstacles.AddLast(new Obstacle(obstaclePosition));
+        Obstacles.AddLast((Obstacle)obstacleType);
         Board[obstaclePosition.X, obstaclePosition.Y] = Cells.obstacle;
     }
 
      public void AddObstacles(Coordinate[] obstaclePosition) {
         for(int n = 0; n < obstaclePosition.Count(); n++){
             if (obstaclePosition[n] == null)
-        {
-            throw new ArgumentNullException(nameof(obstaclePosition));
-        }
+            {
+                throw new ArgumentNullException(nameof(obstaclePosition));
+            }
 
-        // Ensure the obstacle position is within the bounds of the arena
-        if (obstaclePosition[n].X < 0 || obstaclePosition[n].X >= Width || obstaclePosition[n].Y < 0 || obstaclePosition[n].Y >= Height)
-        {
-            throw new ArgumentOutOfRangeException(nameof(obstaclePosition), "Obstacle position is out of bounds.");
-        }
+            // Ensure the obstacle position is within the bounds of the arena
+            if (obstaclePosition[n].X < 0 || obstaclePosition[n].X >= Width || obstaclePosition[n].Y < 0 || obstaclePosition[n].Y >= Height)
+            {
+                throw new ArgumentOutOfRangeException(nameof(obstaclePosition), "Obstacle position is out of bounds.");
+            }
 
-        // Set the obstacle position and update the board
-        Obstacles.AddLast(new Obstacle(obstaclePosition[n]));
-        Board[obstaclePosition[n].X, obstaclePosition[n].Y] = Cells.obstacle;
+            // Set the obstacle position and update the board
+            var obstacleType = _obstacleFactory.GetFlyWeight("red");
+            obstacleType.SetPosition(obstaclePosition[n]);
+            Obstacles.AddLast((Obstacle)obstacleType);
+            Board[obstaclePosition[n].X, obstaclePosition[n].Y] = Cells.obstacle;
         }
-        
     }
 
     public void GenerateStrategyCell()

@@ -1,15 +1,18 @@
 ﻿using SnakeMultiplayer.Services;
+using SnakeMultiplayer.Services.Flyweight;
 
 namespace SnakeMultiplayer.Models
 {
-    public class Obstacle
+    public class Obstacle : IObstacleFlyweight
     {
         public Coordinate Position { get; private set; }
-        public string Color { get; private set; } = "Red"; // Default color
+        public string Color { get; private set; }
 
-        public Obstacle(Coordinate position)
+        public Obstacle(string color = "Red")
         {
-            Position = position;
+            Color = color;
         }
+
+        public void SetPosition(Coordinate extrinsicState) => Position = extrinsicState;
     }
 }
