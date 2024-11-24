@@ -198,12 +198,11 @@ namespace SnakeMultiplayer.Services
         public void CreateObstacles(Arena arena,  int count)
         {
             Random random = new Random();
-            Coordinate[] obstacleList = new Coordinate[count+1];
             for (int i = 0; i <= count; i++)
             {
-                obstacleList[i] = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));           
-            }
-            arena.AddObstacles(obstacleList);
+                var newObstacle = new Coordinate(random.Next(0, arena.Width), random.Next(0, arena.Height));
+                arena.AddObstacle(newObstacle);
+            }        
         }
 
         public Snake CreateSnake(ConcurrentDictionary<string, Snake> players, string playerName, IMovementStrategy movementStrategy)

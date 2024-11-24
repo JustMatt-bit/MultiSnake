@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 
+using SnakeMultiplayer.Services.Composite;
+
 namespace SnakeMultiplayer.Services
 {
     public class ArenaDirector
@@ -11,12 +13,12 @@ namespace SnakeMultiplayer.Services
             _builder = builder;
         }
 
-        public Arena ConstructArena(ConcurrentDictionary<string, Snake> players, int width, int height, int obstacleCount, Speed speed)
+        public Arena ConstructArena(ConcurrentDictionary<string, Snake> players, int width, int height, IObstacleComponent obstacles, Speed speed) 
         {
             return _builder.Start(players)
                            .SetSpeed(speed)
                            .SetBoardSize(width, height)
-                           .AddObstacles(obstacleCount)
+                           .AddObstacles(obstacles)
                            .Build();
         }
     }

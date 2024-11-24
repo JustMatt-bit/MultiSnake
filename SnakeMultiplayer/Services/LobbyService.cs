@@ -7,6 +7,8 @@ using System.Linq;
 using JsonLibrary.FromClient;
 using JsonLibrary.FromServer;
 
+using SnakeMultiplayer.Services.Composite;
+
 using SnakeMultiplayer.Services.Strategies.Movement;
 
 namespace SnakeMultiplayer.Services;
@@ -75,7 +77,16 @@ public class LobbyService : ILobbyService
         int boardSize = 20;
         int obstacleCount = level * 5;
         Speed speed = factory.GetSpeed();
-        Arena = director.ConstructArena(players, boardSize, boardSize, obstacleCount, speed);
+
+        var obstacleGroup = new ObstacleGroup();
+        for (int i = 0; i < obstacleCount; i++)
+        {
+            Random Random = new Random();
+            var obstacle = new SingleObstacle(new Coordinate(Random.Next(0, boardSize), Random.Next(0, boardSize)));
+            obstacleGroup.Add(obstacle);
+        }
+
+        Arena = director.ConstructArena(players, boardSize, boardSize, obstacleGroup, speed);
     }
      public void RegisterObserver(IObserver observer)
     {
