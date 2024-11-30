@@ -31,7 +31,7 @@ public class Arena
     public int Height;
     bool IsWall;
     Coordinate Food;
-    LinkedList<Obstacle> Obstacles;
+    LinkedList<(IObstacleFlyweight Obstacle, Coordinate Position)> Obstacles;
     StrategyCell StrategyCell;
 
     public Arena(ConcurrentDictionary<string, Snake> players, Speed speed)
@@ -40,7 +40,7 @@ public class Arena
         PendingActions = new ConcurrentDictionary<string, MoveDirection>();
         Scores = new ConcurrentDictionary<string, int>();
         Food = null;
-        Obstacles = new LinkedList<Obstacle>();
+        Obstacles = new LinkedList<(IObstacleFlyweight Obstacle, Coordinate Position)>();
         Speed = speed;
     }
 
@@ -53,7 +53,7 @@ public class Arena
 
     public ArenaStatus GenerateReport()
     {
-        obstacleXY[] obstaclesArray = Obstacles.Select(o => new obstacleXY(new XY(o.Position.X, o.Position.Y), o.Color)).ToArray();
+        obstacleXY[] obstaclesArray = Obstacles.Select(o => new obstacleXY(new XY(o.Position.X, o.Position.Y), ((Obstacle)o.Obstacle).Color)).ToArray();
 
         // Create an ArenaStatus instance with food and obstacles
         var report = new ArenaStatus(
@@ -191,11 +191,11 @@ public class Arena
         }
 
         var obstacleType = _obstacleFactory.GetFlyWeight("red");
-        obstacleType.SetPosition(obstaclePosition);
 
         // Set the obstacle position and update the board
-        Obstacles.AddLast((Obstacle)obstacleType);
-        Board[obstaclePosition.X, obstaclePosition.Y] = Cells.obstacle;
+        obstacleType.PlaceOnBoard(obstaclePosition, Board);
+        Obstacles.AddLast((obstacleType, obstaclePosition));
+        //Board[obstaclePosition.X, obstaclePosition.Y] = Cells.obstacle;
     }
 
      public void AddObstacles(Coordinate[] obstaclePosition) {
@@ -213,9 +213,9 @@ public class Arena
 
             // Set the obstacle position and update the board
             var obstacleType = _obstacleFactory.GetFlyWeight("red");
-            obstacleType.SetPosition(obstaclePosition[n]);
-            Obstacles.AddLast((Obstacle)obstacleType);
-            Board[obstaclePosition[n].X, obstaclePosition[n].Y] = Cells.obstacle;
+            obstacleType.PlaceOnBoard(obstaclePosition[n], Board);
+            Obstacles.AddLast((obstacleType, obstaclePosition[n]));
+            //Board[obstaclePosition[n].X, obstaclePosition[n].Y] = Cells.obstacle;
         }
     }
 

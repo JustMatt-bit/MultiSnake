@@ -5,7 +5,7 @@ namespace SnakeMultiplayer.Models
 {
     public class Obstacle : IObstacleFlyweight
     {
-        public Coordinate Position { get; private set; }
+        //public Coordinate Position { get; private set; }
         public string Color { get; private set; }
 
         public Obstacle(string color = "Red")
@@ -13,6 +13,9 @@ namespace SnakeMultiplayer.Models
             Color = color;
         }
 
-        public void SetPosition(Coordinate extrinsicState) => Position = extrinsicState;
+        public void PlaceOnBoard(Coordinate position, Cells[,] board)
+        {
+            board[position.X, position.Y] = Cells.obstacle;
+        }
     }
 }
