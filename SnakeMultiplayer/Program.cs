@@ -70,6 +70,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "createLobbyProxy",
+    pattern: "Lobby/CreateLobby",
+    defaults: new { controller = "LobbyProxy", action = "CreateLobby" });
+
+
+app.MapControllerRoute(
     name: "login",
     pattern: "login",
     defaults: new { controller = "Account", action = "Login" });

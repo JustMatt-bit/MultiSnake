@@ -9,6 +9,12 @@ namespace SnakeMultiplayer.Controllers;
 [Authorize]
 public class LobbyController : Controller
 {
+    private readonly IGameServerService _gameServer;
+
+    public LobbyController(IGameServerService gameServer)
+    {
+        _gameServer = gameServer;
+    }
 
     private static readonly string InvalidStringErrorMessage = @"Please use only letters, numbers and spaces only between words. ";
 
@@ -19,8 +25,13 @@ public class LobbyController : Controller
     public IActionResult CreateLobby() => View();
 
     [HttpPost]
-    public IActionResult CreateLobby([FromServices] IGameServerService gameServer, string id = "", int level = 1)
+    public IActionResult CreateLobby(string id = "", int level = 1)
     {
+        if (User == null || !User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
         string playerName = User.Identity.Name;
         ViewData["playerName"] = playerName;
         ViewData["lobbyId"] = id;
@@ -33,7 +44,7 @@ public class LobbyController : Controller
             return View();
         }
 
-        if (!gameServer.TryCreateLobby(id, playerName, gameServer, level))
+        if (!_gameServer.TryCreateLobby(id, playerName, _gameServer, level))
         {
             ViewData["ErrorMessage"] = $"Lobby with {id} already exists. Please enter different name";
             return View();
