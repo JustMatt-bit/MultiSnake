@@ -24,7 +24,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 builder.Services.AddSingleton<IGameServerService, GameServerService>();
 builder.Services.AddSingleton<ITimerService, TimerService>();
 builder.Services.AddSingleton<IScoringService, ScoringService>();
-builder.Services.AddScoped<ILoggerService, LoggerService>();
+
 builder.Services.AddTransient<IServerHub, ServerHub>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddSingleton<ICommandService, CommandService>();
@@ -68,6 +68,12 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "createLobbyProxy",
+    pattern: "Lobby/CreateLobby",
+    defaults: new { controller = "LobbyProxy", action = "CreateLobby" });
+
 
 app.MapControllerRoute(
     name: "login",

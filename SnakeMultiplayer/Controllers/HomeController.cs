@@ -7,12 +7,12 @@ using SnakeMultiplayer.Services;
 namespace SnakeMultiplayer.Controllers;
 
 [Authorize]
-public class HomeController : ProxyControllerBase
+public class HomeController : Controller
 {
     private readonly IScoringService _scoreService;
     public IActionResult Index() => View();
 
-    public HomeController(ILoggerService logger, IScoringService scoreService) : base(logger)
+    public HomeController(IScoringService scoreService)
     {
         _scoreService = scoreService;
     }

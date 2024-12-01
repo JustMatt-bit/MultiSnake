@@ -14,6 +14,8 @@ namespace SnakeMultiplayer.Services
     {
         Task<bool> LoginAsync(string userName, string password);
         Task<bool> RegisterAsync(string userName, string password);
+        Task<bool> IsAdmin(string userName);
+
     }
 
     public class AuthService : IAuthService
@@ -38,7 +40,7 @@ namespace SnakeMultiplayer.Services
             }
 
             var hashedPassword = BC.HashPassword(password);
-            var userEntry = $"{userName}:{hashedPassword}";
+            var userEntry = $"{userName}:{hashedPassword}:user";
 
             await _textFileStorage.SaveDataAsync(usersFileName + ".txt", userEntry);
             await _jsonFileStorage.SaveDataAsync(usersFileName + ".json", userEntry);
@@ -58,6 +60,18 @@ namespace SnakeMultiplayer.Services
             var isPasswordValid = BC.Verify(password, storedHashedPassword);
 
             return isPasswordValid;
+        }
+
+        public async Task<bool> IsAdmin(string userName)
+        {
+            var user = await GetUserAsync(userName);
+            if (user == null)
+            {
+                return false;
+            }
+
+            var userRole = user.Split(':')[2];
+            return userRole == "admin";
         }
 
         private async Task<bool> UserExistsAsync(string userName)

@@ -10,13 +10,13 @@ using SnakeMultiplayer.Services;
 
 namespace SnakeMultiplayer.Controllers
 {
-    public class AccountController : ProxyControllerBase
+    public class AccountController : Controller
     {
         private readonly IAuthService _authService;
-        public AccountController(ILoggerService logger, IAuthService authService) : base(logger)
-    {
-        _authService = authService;
-    }
+        public AccountController(IAuthService authService)
+        {
+            _authService = authService;
+        }
 
         [HttpGet]
         public IActionResult Login(string returnUrl)
