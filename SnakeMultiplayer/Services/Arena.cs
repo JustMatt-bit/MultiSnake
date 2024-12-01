@@ -9,6 +9,7 @@ using SnakeMultiplayer.Models;
 using SnakeMultiplayer.Services.Strategies.Movement;
 using SnakeMultiplayer.Services.Appearance;
 using SnakeMultiplayer.Services.Composite;
+using SnakeMultiplayer.Services.Flyweight;
 
 namespace SnakeMultiplayer.Services;
 
@@ -19,6 +20,7 @@ public class Arena
     readonly Random Random = new(Guid.NewGuid().GetHashCode());
     readonly ConcurrentDictionary<string, Snake> Snakes;
     private Dictionary<string, Snake> clonedSnakes = new Dictionary<string, Snake>();
+    private readonly ObstacleFlyweightFactory _obstacleFactory = new();
 
     readonly ConcurrentDictionary<string, MoveDirection> PendingActions;
     readonly int _strategiesCount = 4;
@@ -30,7 +32,7 @@ public class Arena
     public int Height;
     bool IsWall;
     Coordinate Food;
-    LinkedList<Obstacle> Obstacles;
+    LinkedList<(IObstacleFlyweight Obstacle, Coordinate Position)> Obstacles;
     StrategyCell StrategyCell;
 
     public Arena(ConcurrentDictionary<string, Snake> players, Speed speed)
@@ -39,7 +41,7 @@ public class Arena
         PendingActions = new ConcurrentDictionary<string, MoveDirection>();
         Scores = new ConcurrentDictionary<string, int>();
         Food = null;
-        Obstacles = new LinkedList<Obstacle>();
+        Obstacles = new LinkedList<(IObstacleFlyweight Obstacle, Coordinate Position)>();
         Speed = speed;
     }
 
@@ -52,7 +54,7 @@ public class Arena
 
     public ArenaStatus GenerateReport()
     {
-        obstacleXY[] obstaclesArray = Obstacles.Select(o => new obstacleXY(new XY(o.Position.X, o.Position.Y), o.Color)).ToArray();
+        obstacleXY[] obstaclesArray = Obstacles.Select(o => new obstacleXY(new XY(o.Position.X, o.Position.Y), ((Obstacle)o.Obstacle).Color)).ToArray();
 
         // Create an ArenaStatus instance with food and obstacles
         var report = new ArenaStatus(
@@ -189,9 +191,12 @@ public class Arena
             throw new ArgumentOutOfRangeException(nameof(obstaclePosition), "Obstacle position is out of bounds.");
         }
 
+        var obstacleType = _obstacleFactory.GetFlyWeight("red");
+
         // Set the obstacle position and update the board
-        Obstacles.AddLast(new Obstacle(obstaclePosition));
-        Board[obstaclePosition.X, obstaclePosition.Y] = Cells.obstacle;
+        obstacleType.PlaceOnBoard(obstaclePosition, Board);
+        Obstacles.AddLast((obstacleType, obstaclePosition));
+        //Board[obstaclePosition.X, obstaclePosition.Y] = Cells.obstacle;
     }
 
     public void AddObstacles(IObstacleComponent obstacles)
