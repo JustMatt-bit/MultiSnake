@@ -7,8 +7,10 @@ using SnakeMultiplayer.Services;
 namespace SnakeMultiplayer.Controllers;
 
 [Authorize]
-public class LobbyController : Controller
+public class LobbyController : ProxyControllerBase
 {
+    public LobbyController(ILoggerService logger) : base(logger) { }
+
     private static readonly string InvalidStringErrorMessage = @"Please use only letters, numbers and spaces only between words. ";
 
     [HttpGet]
