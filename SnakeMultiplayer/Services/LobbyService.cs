@@ -31,26 +31,28 @@ public interface ILobbyService : ISubject
     void OnPlayerUpdate(string player, MoveDirection message);
     Settings SetSettings(Settings settings);
     ArenaStatus InitiateGameStart();
+    public void SetState(ILobbyState newState);
     List<Player> RemovePlayer(string playerName);
     void RecordPlayerScores(IScoringService scoringService);
 }
 
 public class LobbyService : ILobbyService
 {
+    private ILobbyState LobbyState { get; set; }
     public string ID { get; private set; }
-    public LobbyStates State { get; private set; }
+    public LobbyStates State => LobbyState.getStateName();
     public bool IsTimer { get; private set; }
     public Speed Speed { get => Arena.Speed; }
     public bool IsNoSpeed { get => Arena.Speed == Speed.NoSpeed; }
 
-    readonly ConcurrentDictionary<string, Snake> players = new();
+    public ConcurrentDictionary<string, Snake> players = new();
 
     private List<IObserver> observers = new List<IObserver>();
-    private IArenaFactory factory;
+    public IArenaFactory factory;
 
-    private readonly ArenaDirector director;
+    public readonly ArenaDirector director;
 
-    readonly Arena Arena;
+    public Arena Arena;
     readonly int MaxPlayers;
     readonly string HostPlayer;
 
@@ -58,7 +60,7 @@ public class LobbyService : ILobbyService
     {
         ID = id;
         HostPlayer = host;
-        State = LobbyStates.Idle;
+        LobbyState = new IdleState();
         MaxPlayers = maxPlayers;
         factory = ArenaFactoryProvider.GetFactory(level);
         
@@ -96,6 +98,10 @@ public class LobbyService : ILobbyService
         }
     }
 
+    public void SetState(ILobbyState newState){
+        LobbyState = newState;
+    }
+
     public void RemoveObserver(IObserver observer)
     {
         observers.Remove(observer);
@@ -112,20 +118,7 @@ public class LobbyService : ILobbyService
 
     public string AddPlayer(string playerName)
     {
-        var reason = CanJoin(playerName);
-        if (!string.IsNullOrWhiteSpace(reason))
-        {
-            return reason;
-        }
-
-        var snake = factory.CreateSnake(players, playerName, new DefaultMovementStrategy());
-         
-        if (!players.TryAdd(playerName, snake))
-        {
-            return "An error has occured. Please try again later.";
-        }
-
-        return string.Empty;
+        return LobbyState.AddPlayer(this, playerName);
     }
 
     public bool IsHost(string playerName) => playerName == HostPlayer;
@@ -143,24 +136,15 @@ public class LobbyService : ILobbyService
 
     public void EndGame()
     {
-        State = LobbyStates.Idle;
+        LobbyState.EndGame(this);
     }
 
     public ArenaStatus UpdateLobbyState()
     {
-        Arena.UpdateActions();
-        if(Arena.GetScores().Any(score => score.Value >= 15)){
-            Arena.GenerateReport();
-            NotifyObservers("end", "end");
-        }
-        if (!IsGameEnd())
-            return Arena.GenerateReport();
-        
-        State = LobbyStates.Idle;
-        return null;
+        return LobbyState.UpdateLobbyState(this);
     }
 
-    private bool IsGameEnd()
+    public bool IsGameEnd()
     {
         var activePlayers = players.Values.Where(player => player.IsActive);
         var playerCount = players.Count;
@@ -198,15 +182,7 @@ public class LobbyService : ILobbyService
 
     public ArenaStatus InitiateGameStart()
     {
-        if (!State.Equals(LobbyStates.Idle))
-            throw new Exception($"Tried to initialise game start while lobby {ID} is in Idle state.");
-
-        State = LobbyStates.Initialized;
-        _ = Arena.PrepareForNewGame();
-        State = LobbyStates.inGame;
-
-        Debug.WriteLine($"Game initialised in {ID} lobby.");
-        return Arena.GenerateReport();
+        return LobbyState.InitiateGameStart(this);
     }
 
     public void OnPlayerUpdate(string player, MoveDirection direction)
