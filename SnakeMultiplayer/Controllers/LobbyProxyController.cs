@@ -2,46 +2,43 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+using SnakeMultiplayer.Controllers;
 using SnakeMultiplayer.Services;
 
-namespace SnakeMultiplayer.Controllers
+public class LobbyProxyController : Controller
 {
-    [Authorize]
-    public class LobbyProxyController : Controller
+    private readonly IGameServerService _gameServer;
+    private readonly IAuthService _authService;
+    private readonly LobbyController _lobbyController;
+
+    public LobbyProxyController(IGameServerService gameServer, IAuthService authService, LobbyController lobbyController)
     {
-        private readonly IGameServerService _gameServer;
-        private readonly IAuthService _authService;
+        _gameServer = gameServer;
+        _authService = authService;
+        _lobbyController = lobbyController;
+    }
 
-        public LobbyProxyController(IGameServerService gameServer, IAuthService authService)
+    [HttpPost]
+    public async Task<IActionResult> CreateLobby(string id = "", int level = 1)
+    {
+        var username = User.Identity.Name;
+
+        // Check if the user is an admin using AuthService
+        if (await _authService.IsAdmin(username))
         {
-            _gameServer = gameServer;
-            _authService = authService;
+            // Forward the request to the real LobbyController to create the lobby
+            _lobbyController.ControllerContext = new ControllerContext
+            {
+                HttpContext = this.HttpContext
+            };
+
+            return _lobbyController.CreateLobby(id, level);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateLobby(string id = "", int level = 1)
+        else
         {
-            var username = User.Identity.Name;
-            
-            // Check if the user is an admin using AuthService
-            if (await _authService.IsAdmin(username))
-            {
-                // Forward the request to the real LobbyController to create the lobby
-                var lobbyController = new LobbyController(_gameServer)
-                {
-                    ControllerContext = new ControllerContext
-                    {
-                        HttpContext = this.HttpContext
-                    }
-                };
-
-                return lobbyController.CreateLobby(id, level);
-            }
-            else
-            {
-                ViewData["ErrorMessage"] = "Only administrators can create a lobby.";
-                return View("Views/Home/Index.cshtml");
-            }
+            ViewData["ErrorMessage"] = "Only administrators can create a lobby.";
+            return View("Views/Home/Index.cshtml");
         }
     }
 }
