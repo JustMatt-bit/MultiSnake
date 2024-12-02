@@ -27,6 +27,8 @@ builder.Services.AddSingleton<IScoringService, ScoringService>();
 
 builder.Services.AddTransient<IServerHub, ServerHub>();
 builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddScoped<LobbyController>();
+builder.Services.AddScoped<LobbyProxyController>();
 builder.Services.AddSingleton<ICommandService, CommandService>();
 builder.Services.AddSignalR();
 
