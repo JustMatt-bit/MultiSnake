@@ -10,14 +10,12 @@ using SnakeMultiplayer.Services.Strategies.Movement;
 using SnakeMultiplayer.Services.Appearance;
 using SnakeMultiplayer.Services.Composite;
 using SnakeMultiplayer.Services.Flyweight;
-using SnakeMultiplayer.Services.ChainOfResponsibility;
 
 namespace SnakeMultiplayer.Services;
 
 public class Arena
 {
     public Speed Speed { get;  set; }
-    public IPointHandler PointHandlerChain { get; private set; }
 
     readonly Random Random = new(Guid.NewGuid().GetHashCode());
     readonly ConcurrentDictionary<string, Snake> Snakes;
@@ -45,7 +43,6 @@ public class Arena
         Food = null;
         Obstacles = new LinkedList<(IObstacleFlyweight Obstacle, Coordinate Position)>();
         Speed = speed;
-        InitializePointHandlers();
     }
 
 
@@ -388,7 +385,9 @@ public class Arena
             {
                 if (newHead.X < 0 || Width <= newHead.X || newHead.Y < 0 || Width <= newHead.Y)
                 {
-                    snake.Value.Deactivate();
+                    // Deactivate snake using Visitor pattern
+                    IVisitor visitor = new SnakeVisitor();
+                    snake.Value.Accept(visitor);
                     continue;
                 }
             }
@@ -397,23 +396,19 @@ public class Arena
             if (Board[newHead.X, newHead.Y].Equals(Cells.empty))
             {
                 moveResult = snake.Value.Move(currAction, false);
-                var currentScore = PointHandlerChain.Handle(this, snake, Cells.empty);
-                snake.Value.UpdateCrownStage(currentScore);
             }
             else if (Board[newHead.X, newHead.Y].Equals(Cells.food))
             {
                 Food = null;
                 moveResult = snake.Value.Move(currAction, true);
-                var currentScore = PointHandlerChain.Handle(this, snake, Cells.food);
+                var currentScore = Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
                 snake.Value.UpdateCrownStage(currentScore);
-                //var currentScore = Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
-                //snake.Value.UpdateCrownStage(currentScore);
-
+                
+                Console.WriteLine($"Player {snake.Key} scored. Current score: {Scores[snake.Key]}");
             }
             else if (Board[newHead.X, newHead.Y].Equals(Cells.strategyChange))
             {
                 StrategyCell = null;
-                Board[newHead.X, newHead.Y] = Cells.empty;
                 var randomChoice = random.Next(_strategiesCount);
                 IMovementStrategy newMovementStrategy = randomChoice switch
                 {
@@ -427,37 +422,35 @@ public class Arena
                 snake.Value.SetMovementStrategy(newMovementStrategy);
 
                 moveResult = snake.Value.Move(currAction, false);
-                var currentScore = PointHandlerChain.Handle(this, snake, Cells.strategyChange);
+                var currentScore = Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
                 snake.Value.UpdateCrownStage(currentScore);
-                //var currentScore = Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
-                //snake.Value.UpdateCrownStage(currentScore);
 
             }
             else if (Board[newHead.X, newHead.Y].Equals(Cells.snake))
             {
-                var currentScore = PointHandlerChain.Handle(this, snake, Cells.snake);
-                snake.Value.UpdateCrownStage(currentScore);
                 if (snake.Value.GetMovementStrategy() is InverseMovementStrategy || snake.Value.GetMovementStrategy() is ZigZagMovementStrategy)
                 {
                     moveResult = snake.Value.Move(currAction, false);
-                    //var currentScore = Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
-                    //snake.Value.UpdateCrownStage(currentScore);
-
+                    var currentScore = Scores.AddOrUpdate(snake.Key, 1, (key, oldValue) => oldValue + 1);
+                    snake.Value.UpdateCrownStage(currentScore);
 
                 }
                 else
                 {
-                    snake.Value.Deactivate();
+                    // Deactivate snake using Visitor pattern
+                    IVisitor visitor = new SnakeVisitor();
+                    snake.Value.Accept(visitor);
                     continue;
                 }
             }
             else
             {
                 // Clone the snake using the PROTOTYPE pattern to revive it later
-                var currentScore = PointHandlerChain.Handle(this, snake, Cells.obstacle);
-                snake.Value.UpdateCrownStage(currentScore);
 
-                snake.Value.Deactivate(); 
+                // Deactivate snake using Visitor pattern
+                IVisitor visitor = new SnakeVisitor();
+                snake.Value.Accept(visitor);
+
                 clonedSnakes[snake.Key] = snake.Value.Clone();
                 snake.Value.SetBodyToNull();
                 ReviveSnake(snake.Key);
@@ -536,45 +529,5 @@ public class Arena
 
     public Dictionary<string, int> GetScores() {
         return new Dictionary<string, int>(Scores);
-    }
-
-    public int AddScore(string snakeName, int score)
-    {
-        return Scores.AddOrUpdate(snakeName, score, (key, oldValue) => oldValue + score);
-    }
-
-    public int DeductScore(string snakeName)
-    {
-        return Scores.AddOrUpdate(snakeName, 0, (key, oldValue) => Math.Max(oldValue - 1, 0));
-    }
-
-    public int ResetScore(string snakeName)
-    {
-        return Scores.AddOrUpdate(snakeName, 0, (key, oldValue) => 0);
-    }
-
-    public int GetCurrentScore(string snakeName)
-    {
-        if (Scores.TryGetValue(snakeName, out var currentScore))
-        {
-            return currentScore;
-        }
-
-        return 0;
-    }
-
-    public void InitializePointHandlers()
-    {
-        var foodHandler = new FoodPointsHandler();
-        var obstacleHandler = new ObstaclePointsHandler();
-        var snakeHandler = new SnakePointsHandler();
-        var strategyHandler = new StrategyChangePointsHandler();
-
-        // Link the chain
-        foodHandler.SetNext(obstacleHandler)
-                   .SetNext(snakeHandler)
-                   .SetNext(strategyHandler);
-
-        PointHandlerChain = foodHandler; // Store the root of the chain
     }
 }
