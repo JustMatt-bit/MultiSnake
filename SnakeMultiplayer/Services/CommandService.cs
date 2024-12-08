@@ -2,6 +2,7 @@ using System;
 
 using SnakeMultiplayer.Services;
 using SnakeMultiplayer.Services.Commands;
+using SnakeMultiplayer.Services.Interpreter;
 
 namespace SnakeMultiplayer.Services
 {
@@ -32,6 +33,14 @@ public class CommandService : ICommandService
     public void HandleCommand(LobbyHub lobbyHub, string command)
     {
         _lobbyhub = lobbyHub;
+        var context = new Context(this, lobbyHub);
+        var expression = CommandInterpreter.ParseCommand(command);
+        expression.Interpret(command, context);
+    }
+
+    public void ExecuteCommand(LobbyHub lobbyHub, string command)
+    {
+        _lobbyhub = lobbyHub;
         _commandInvoker.ExecuteCommand(command);
     }
 
@@ -50,5 +59,17 @@ public class CommandService : ICommandService
     {
         _lobbyhub.UpdatePlayerState(direction);
     }        
+
+    private IExpression ParseCommand(string command)
+    {
+        var commandParts = command.Split(' ');
+        var rootCommand = commandParts[0].ToLower();
+        return rootCommand switch
+        {
+            "move" => new MoveExpression(),
+            "undo" => new UndoExpression(),
+            _ => null,
+        };
+    }
 }
 }
