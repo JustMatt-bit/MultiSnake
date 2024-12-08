@@ -388,7 +388,9 @@ public class Arena
             {
                 if (newHead.X < 0 || Width <= newHead.X || newHead.Y < 0 || Width <= newHead.Y)
                 {
-                    snake.Value.Deactivate();
+                    // Deactivate snake using Visitor pattern
+                    IVisitor visitor = new SnakeVisitor();
+                    snake.Value.Accept(visitor);
                     continue;
                 }
             }
@@ -447,24 +449,32 @@ public class Arena
                 }
                 else
                 {
-                    snake.Value.Deactivate();
+                    // Deactivate snake using Visitor pattern
+                    IVisitor visitor = new SnakeVisitor();
+                    snake.Value.Accept(visitor);
+                    // Clone the snake using the PROTOTYPE pattern to revive it later
+                    clonedSnakes[snake.Key] = snake.Value.Clone();
+                    snake.Value.SetBodyToNull();
+                    ReviveSnake(snake.Key);
                     continue;
+
                 }
             }
-            else
+            else 
             {
-                // Clone the snake using the PROTOTYPE pattern to revive it later
                 var currentScore = PointHandlerChain.Handle(this, snake, Cells.obstacle);
                 snake.Value.UpdateCrownStage(currentScore);
 
-                snake.Value.Deactivate(); 
+                // Deactivate snake using Visitor pattern
+                IVisitor visitor = new SnakeVisitor();
+                snake.Value.Accept(visitor);
+                // Clone the snake using the PROTOTYPE pattern to revive it later
                 clonedSnakes[snake.Key] = snake.Value.Clone();
                 snake.Value.SetBodyToNull();
                 ReviveSnake(snake.Key);
 
                 continue;
             }
-
             if (moveResult == null)
             {
                 continue;

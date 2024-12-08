@@ -48,10 +48,6 @@ public class Snake : IPrototype<Snake>
         _ = body.AddFirst(coordinate);
     }
 
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
 
     public void SetBodyToNull(){
         body = null;
@@ -170,5 +166,15 @@ public class Snake : IPrototype<Snake>
             this.CrownStage = CrownStage.Outline;
         else
             this.CrownStage = CrownStage.None;
+    }
+
+    public void Accept(IVisitor visitor)
+    {
+        visitor.Visit(this);
+    }
+
+    public void ToggleActiveState()
+    {
+        this.IsActive = !this.IsActive;
     }
 }
