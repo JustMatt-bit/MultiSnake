@@ -11,6 +11,8 @@ using SnakeMultiplayer.Services.Appearance;
 using SnakeMultiplayer.Services.Composite;
 using SnakeMultiplayer.Services.Flyweight;
 using SnakeMultiplayer.Services.ChainOfResponsibility;
+using SnakeMultiplayer.Services.Memento;
+using Microsoft.VisualBasic;
 
 namespace SnakeMultiplayer.Services;
 
@@ -22,12 +24,13 @@ public class Arena
     readonly Random Random = new(Guid.NewGuid().GetHashCode());
     readonly ConcurrentDictionary<string, Snake> Snakes;
     private Dictionary<string, Snake> clonedSnakes = new Dictionary<string, Snake>();
+    private readonly ConcurrentDictionary<string, ISnakeMemento> _snakeMementos = new();
     private readonly ObstacleFlyweightFactory _obstacleFactory = new();
 
     readonly ConcurrentDictionary<string, MoveDirection> PendingActions;
     readonly int _strategiesCount = 4;
 
-    ConcurrentDictionary<string, int> Scores;
+    public ConcurrentDictionary<string, int> Scores { get; private set; }
     ConcurrentDictionary<string, MoveDirection> PreviousActions;
     Cells[,] Board;
     public int Width;
@@ -405,6 +408,10 @@ public class Arena
             else if (Board[newHead.X, newHead.Y].Equals(Cells.food))
             {
                 Food = null;
+
+                var memento = snake.Value.SaveState();
+                _snakeMementos[snake.Key] = memento;
+
                 moveResult = snake.Value.Move(currAction, true);
                 var currentScore = PointHandlerChain.Handle(this, snake, Cells.food);
                 snake.Value.UpdateCrownStage(currentScore);
@@ -462,8 +469,16 @@ public class Arena
             }
             else 
             {
-                var currentScore = PointHandlerChain.Handle(this, snake, Cells.obstacle);
-                snake.Value.UpdateCrownStage(currentScore);
+                if (_snakeMementos.TryGetValue(snake.Key, out var memento))
+                {
+                    RemoveSnakeFromBoard(snake.Value);
+                    snake.Value.RestoreState(memento);
+                    AddSnakeToBoard(snake.Value);
+                    _snakeMementos.Remove(snake.Key, out _);
+                    var currentScore = PointHandlerChain.Handle(this, snake, Cells.obstacle);
+                    snake.Value.UpdateCrownStage(currentScore);
+                }
+
 
                 // Deactivate snake using Visitor pattern
                 IVisitor visitor = new SnakeVisitor();
@@ -586,5 +601,37 @@ public class Arena
                    .SetNext(strategyHandler);
 
         PointHandlerChain = foodHandler; // Store the root of the chain
+    }
+
+    public void RemoveSnakeFromBoard(Snake snake)
+    {
+        if (snake == null || Board == null)
+            throw new ArgumentNullException("Snake or board cannot be null.");
+
+        var bodyCoordinates = snake.GetBodyList(); // Get current body coordinates of the snake
+        foreach (var coord in bodyCoordinates)
+        {
+            if (coord.X >= 0 && coord.X < Board.GetLength(0) &&
+                coord.Y >= 0 && coord.Y < Board.GetLength(1))
+            {
+                Board[coord.X, coord.Y] = Cells.empty;
+            }
+        }
+    }
+
+    public void AddSnakeToBoard(Snake snake)
+    {
+        if (snake == null || Board == null)
+            throw new ArgumentNullException("Snake or board cannot be null.");
+
+        var bodyCoordinates = snake.GetBodyList(); 
+        foreach (var coord in bodyCoordinates)
+        {
+            if (coord.X >= 0 && coord.X < Board.GetLength(0) &&
+                coord.Y >= 0 && coord.Y < Board.GetLength(1))
+            {
+                Board[coord.X, coord.Y] = Cells.snake; 
+            }
+        }
     }
 }
