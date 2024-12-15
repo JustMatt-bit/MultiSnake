@@ -6,6 +6,7 @@ using SnakeMultiplayer.Services.Strategies.Movement;
 using SnakeMultiplayer.Services.Appearance;
 using SnakeMultiplayer.Models;
 using SnakeMultiplayer.Services.Decorator;
+using SnakeMultiplayer.Services.Memento;
 
 namespace SnakeMultiplayer.Services;
 
@@ -177,4 +178,29 @@ public class Snake : IPrototype<Snake>
     {
         this.IsActive = !this.IsActive;
     }
+
+    public ISnakeMemento SaveState()
+    {
+        if (body == null)
+        {
+            throw new InvalidOperationException("Cannot save state; body is null.");
+        }
+
+        return new SnakeBodyMemento(body, Tail, MovementStrategy);
+    }
+
+    public void RestoreState(ISnakeMemento memento)
+    {
+        if (memento == null)
+        {
+            throw new ArgumentNullException(nameof(memento), "Memento cannot be null.");
+        }
+
+        var bodyState = memento.GetBodyState();
+        this.body = bodyState.BodyCoordinates;
+        this.Tail = bodyState.TailCoordinates;
+        this.MovementStrategy = bodyState.CurrentSnakeMovementStrategy;
+    }
+
 }
+
